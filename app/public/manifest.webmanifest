@@ -1,0 +1,9 @@
+{
+  "name": "Hit & Blow",
+  "short_name": "Hit & Blow",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#FAF9F5",
+  "theme_color": "#4A6A94",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
