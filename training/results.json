@@ -1,0 +1,123 @@
+{
+  "games": 1000,
+  "seed": 12345,
+  "checkpoints": {
+    "easy": "ep600",
+    "normal": "ep1300",
+    "hard": "ep30000"
+  },
+  "summary": {
+    "baseline": {
+      "mean_turns": 5.463,
+      "mean_turns_solved": 5.463,
+      "solved_rate": 1.0,
+      "max_turns": 8
+    },
+    "easy": {
+      "mean_turns": 7.436,
+      "mean_turns_solved": 7.396359959555106,
+      "solved_rate": 0.989,
+      "max_turns": 11
+    },
+    "normal": {
+      "mean_turns": 5.926,
+      "mean_turns_solved": 5.905622489959839,
+      "solved_rate": 0.996,
+      "max_turns": 11
+    },
+    "hard": {
+      "mean_turns": 5.264,
+      "mean_turns_solved": 5.264,
+      "solved_rate": 1.0,
+      "max_turns": 7
+    }
+  },
+  "vs_baseline": {
+    "easy": {
+      "win": 0.092,
+      "draw": 0.11499999999999999,
+      "lose": 0.793
+    },
+    "normal": {
+      "win": 0.296,
+      "draw": 0.23299999999999998,
+      "lose": 0.471
+    },
+    "hard": {
+      "win": 0.41,
+      "draw": 0.32100000000000006,
+      "lose": 0.269
+    }
+  },
+  "head_to_head": {
+    "easy_vs_normal": {
+      "win": 0.103,
+      "draw": 0.16400000000000003,
+      "lose": 0.733
+    },
+    "easy_vs_hard": {
+      "win": 0.042,
+      "draw": 0.08299999999999996,
+      "lose": 0.875
+    },
+    "normal_vs_hard": {
+      "win": 0.15,
+      "draw": 0.346,
+      "lose": 0.504
+    }
+  },
+  "distribution": {
+    "baseline": [
+      0,
+      7,
+      29,
+      119,
+      327,
+      386,
+      121,
+      11,
+      0,
+      0,
+      0
+    ],
+    "easy": [
+      0,
+      1,
+      13,
+      20,
+      74,
+      154,
+      244,
+      236,
+      166,
+      81,
+      11
+    ],
+    "normal": [
+      0,
+      3,
+      29,
+      97,
+      249,
+      334,
+      180,
+      62,
+      24,
+      18,
+      4
+    ],
+    "hard": [
+      0,
+      0,
+      16,
+      112,
+      488,
+      360,
+      24,
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+}
