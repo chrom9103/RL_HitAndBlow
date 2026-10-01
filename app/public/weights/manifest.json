@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "sizes": [
+    51,
+    64,
+    64,
+    1
+  ],
+  "files": {
+    "easy": "easy.bin",
+    "normal": "normal.bin",
+    "hard": "hard.bin"
+  }
+}
