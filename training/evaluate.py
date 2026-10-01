@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 import numpy as np
@@ -56,17 +57,22 @@ def summary(t: np.ndarray) -> dict:
     }
 
 
-def scan(run: Path, n: int, seed: int) -> None:
+def _scan_one(args: tuple[Path, int, int]) -> tuple[str, np.ndarray]:
+    path, n, seed = args
+    return path.stem, agent_turns(path, secrets(n, seed), FeatureMemo())
+
+
+def scan(run: Path, n: int, seed: int, jobs: int, every: int) -> None:
     secs = secrets(n, seed)
-    memo = FeatureMemo()
     base = baseline_turns(secs, seed)
     print(f"baseline           mean {base.mean():.3f}  solved {np.mean(base < FAIL_TURNS):.1%}")
     ckpts = sorted(run.glob("ep*.pt"), key=lambda p: int(re.findall(r"\d+", p.stem)[0]))
-    for p in ckpts:
-        t = agent_turns(p, secs, memo)
-        w, d, l = wdl(t, base)
-        print(f"{p.stem:<18} mean {t.mean():.3f}  solved {np.mean(t < FAIL_TURNS):.1%}  "
-              f"vs baseline W/D/L {w:.1%}/{d:.1%}/{l:.1%}", flush=True)
+    ckpts = [p for p in ckpts if int(re.findall(r"\d+", p.stem)[0]) % every == 0]
+    with ProcessPoolExecutor(max_workers=jobs) as pool:
+        for name, t in pool.map(_scan_one, [(p, n, seed) for p in ckpts]):
+            w, d, l = wdl(t, base)
+            print(f"{name:<18} mean {t.mean():.3f}  solved {np.mean(t < FAIL_TURNS):.1%}  "
+                  f"vs baseline W/D/L {w:.1%}/{d:.1%}/{l:.1%}", flush=True)
 
 
 def full(n: int, seed: int) -> None:
@@ -126,9 +132,11 @@ def main() -> None:
     p.add_argument("--scan", type=Path)
     p.add_argument("--games", type=int, default=1000)
     p.add_argument("--seed", type=int, default=12345)
+    p.add_argument("--jobs", type=int, default=8, help="--scan で並列に計測するプロセス数")
+    p.add_argument("--every", type=int, default=1, help="--scan でこのエピソード数の倍数のチェックポイントだけ計測")
     a = p.parse_args()
     if a.scan:
-        scan(a.scan, a.games, a.seed)
+        scan(a.scan, a.games, a.seed, a.jobs, a.every)
     else:
         full(a.games, a.seed)
 

@@ -94,6 +94,7 @@ def main() -> None:
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--episodes", type=int, default=40000)
     p.add_argument("--save-at", default=DEFAULT_SAVE_AT)
+    p.add_argument("--save-every", type=int, default=0, help="このエピソード数ごとにも保存する")
     p.add_argument("--out", default="runs/main")
     p.add_argument("--lr", type=float, default=3e-4)
     p.add_argument("--gamma", type=float, default=1.0)
@@ -188,7 +189,7 @@ def main() -> None:
         recent_turns.append(env.turn if solved else MAX_TURNS + 1)
         recent_solved.append(solved)
 
-        if ep in save_at:
+        if ep in save_at or (a.save_every and ep % a.save_every == 0):
             torch.save(online.state_dict(), out / f"ep{ep}.pt")
         if ep % a.log_every == 0:
             n = len(recent_turns)
