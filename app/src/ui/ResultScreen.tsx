@@ -8,6 +8,8 @@ import { Logo } from './marks'
 interface Props {
   difficulty: Difficulty
   match: Match
+  /** ヒントを見た手番の数 */
+  hints: number
   onRetry: () => void
   onChangeDifficulty: () => void
 }
@@ -24,7 +26,7 @@ function describe(solved: boolean, turns: number) {
   return turns >= MAX_TURNS ? `${turns}回で当てられず` : `${turns}回(未正解)`
 }
 
-export function ResultScreen({ difficulty, match, onRetry, onChangeDifficulty }: Props) {
+export function ResultScreen({ difficulty, match, hints, onRetry, onChangeDifficulty }: Props) {
   const outcome = match.outcome!
   const headingRef = useRef<HTMLHeadingElement>(null)
   useEffect(() => headingRef.current?.focus(), [])
@@ -48,6 +50,7 @@ export function ResultScreen({ difficulty, match, onRetry, onChangeDifficulty }:
           <div>
             <dt>あなた</dt>
             <dd>{describe(outcome.playerSolved, outcome.playerTurns)}</dd>
+            {hints > 0 && <dd className="verdict__hints">ヒント使用: {hints}回</dd>}
           </div>
           <div>
             <dt>CPU</dt>

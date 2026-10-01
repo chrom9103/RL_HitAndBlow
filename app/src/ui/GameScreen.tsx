@@ -3,13 +3,16 @@ import { CODE_LENGTH, randomCode, validateGuess } from '../game/codes'
 import { DIFFICULTY_LABEL, type Difficulty } from '../game/difficulty'
 import { applyGuess, createMatch, type Match } from '../game/match'
 import { createCpu, type Cpu } from '../cpu/client'
+import { createHinter, type Hinter } from '../hint/client'
+import type { Hint } from '../hint/minimax'
 import { History } from './History'
 import { Keypad } from './Keypad'
 import { Logo } from './marks'
 
 interface Props {
   difficulty: Difficulty
-  onFinish: (match: Match) => void
+  /** hints: ヒントを見た手番の数 */
+  onFinish: (match: Match, hints: number) => void
   onQuit: () => void
 }
 
@@ -23,6 +26,10 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [fatal, setFatal] = useState(false)
   const cpuRef = useRef<Cpu | null>(null)
+  const hinterRef = useRef<Hinter | null>(null)
+  /** data が null の間は計算中 */
+  const [hint, setHint] = useState<{ turn: number; data: Hint | null } | null>(null)
+  const [hintTurns, setHintTurns] = useState<ReadonlySet<number>>(() => new Set())
 
   useEffect(() => {
     const cpu = createCpu(difficulty)
@@ -32,6 +39,15 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
       cpuRef.current = null
     }
   }, [difficulty])
+
+  useEffect(() => {
+    const hinter = createHinter()
+    hinterRef.current = hinter
+    return () => {
+      hinter.dispose()
+      hinterRef.current = null
+    }
+  }, [])
 
   // CPU の手番
   useEffect(() => {
@@ -54,11 +70,35 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
   // 終了したら少し間を置いて結果へ
   useEffect(() => {
     if (!match.outcome) return
-    const t = setTimeout(() => onFinish(match), 1100)
+    const t = setTimeout(() => onFinish(match, hintTurns.size), 1100)
     return () => clearTimeout(t)
-  }, [match, onFinish])
+  }, [match, onFinish, hintTurns])
 
   const playerTurn = match.next === 'player'
+  const turnNo = match.player.length
+  // 手番が進んだら前のヒントは消える
+  const shownHint = hint && hint.turn === turnNo ? hint : null
+
+  const requestHint = useCallback(() => {
+    const hinter = hinterRef.current
+    if (!playerTurn || !hinter || (hint && hint.turn === turnNo)) return
+    const turn = turnNo
+    setHint({ turn, data: null })
+    setHintTurns((s) => new Set(s).add(turn))
+    hinter
+      .hint(match.player)
+      .then((data) => setHint((h) => (h && h.turn === turn ? { turn, data } : h)))
+      .catch(() => {
+        setHint((h) => (h && h.turn === turn ? null : h))
+        setError('ヒントを計算できませんでした。')
+      })
+  }, [hint, match.player, playerTurn, turnNo])
+
+  const fillHint = useCallback(() => {
+    if (!playerTurn || !shownHint?.data) return
+    setInput(shownHint.data.guess)
+    setError(null)
+  }, [playerTurn, shownHint])
 
   const addDigit = useCallback(
     (d: string) => {
@@ -171,6 +211,15 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
           <p className={`status ${fatal ? 'status--error' : ''}`} aria-live="polite">
             {status}
           </p>
+          <div className="hint" aria-live="polite">
+            {shownHint?.data ? (
+              <HintText hint={shownHint.data} onUse={playerTurn ? fillHint : undefined} />
+            ) : (
+              <button type="button" className="hint-button" onClick={requestHint} disabled={!playerTurn || !!shownHint}>
+                {shownHint ? '計算中…' : 'ヒント'}
+              </button>
+            )}
+          </div>
           <div className={`entry ${playerTurn ? '' : 'is-waiting'}`} aria-label={`入力中の数字: ${input || 'なし'}`}>
             {Array.from({ length: CODE_LENGTH }, (_, i) => (
               <span key={i} className={`entry__slot ${i === input.length && playerTurn ? 'is-cursor' : ''}`}>
@@ -192,5 +241,30 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
         </section>
       </div>
     </main>
+  )
+}
+
+function HintText({ hint, onUse }: { hint: Hint; onUse?: () => void }) {
+  const use = onUse && (
+    <button type="button" className="link-button hint__use" onClick={onUse}>
+      入力する
+    </button>
+  )
+  if (hint.remaining === 1) {
+    return (
+      <p className="hint__text">
+        答えは <span className="code">{hint.guess}</span> です {use}
+      </p>
+    )
+  }
+  return (
+    <p className="hint__text">
+      残り候補 {hint.remaining.toLocaleString()} 通り。おすすめ <span className="code">{hint.guess}</span> {use}
+      <span className="hint__note">
+        {hint.isCandidate
+          ? `当たる可能性あり。外れても最悪で残り ${hint.worst.toLocaleString()} 通り`
+          : `答えではありませんが、最悪でも残り ${hint.worst.toLocaleString()} 通りに絞れます`}
+      </span>
+    </p>
   )
 }

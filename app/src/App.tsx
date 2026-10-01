@@ -8,7 +8,7 @@ import { TopScreen } from './ui/TopScreen'
 type Screen =
   | { name: 'top' }
   | { name: 'game'; difficulty: Difficulty; round: number }
-  | { name: 'result'; difficulty: Difficulty; round: number; match: Match }
+  | { name: 'result'; difficulty: Difficulty; round: number; match: Match; hints: number }
 
 export function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'top' })
@@ -18,8 +18,8 @@ export function App() {
     window.scrollTo(0, 0)
   }, [])
   const toTop = useCallback(() => setScreen({ name: 'top' }), [])
-  const finish = useCallback((match: Match) => {
-    setScreen((s) => (s.name === 'game' ? { name: 'result', difficulty: s.difficulty, round: s.round, match } : s))
+  const finish = useCallback((match: Match, hints: number) => {
+    setScreen((s) => (s.name === 'game' ? { name: 'result', difficulty: s.difficulty, round: s.round, match, hints } : s))
     window.scrollTo(0, 0)
   }, [])
 
@@ -33,6 +33,7 @@ export function App() {
         <ResultScreen
           difficulty={screen.difficulty}
           match={screen.match}
+          hints={screen.hints}
           onRetry={() => start(screen.difficulty, screen.round + 1)}
           onChangeDifficulty={toTop}
         />
