@@ -1,10 +1,14 @@
 """Hit & Blow の CPU を DQN で学習する。
 
-    python train.py                     # 既定の設定(シード 0)で学習
+    python train.py                     # 既定の設定(シード 0、30,000 エピソード)で学習 → runs/main
     python train.py --episodes 2000     # 短く試す
 
 1 回の学習ランの途中で --save-at のエピソード数ごとにチェックポイントを保存する。
 難易度(Easy / Normal / Hard)には、このうち 3 つを割り当てる(difficulties.json)。
+
+学習率は最初の 600 エピソードは 3e-4 で基本(候補と矛盾しない予想の価値)を素早く覚え、
+その後 3e-5 に下げて、数千〜数万エピソードかけてゆっくり上達させる。
+これにより、途中のチェックポイントの強さに段階的な差が出る。
 
 DQN の構成:
   - Q(s, a) を 1 値で出す MLP を全 5,040 予想に適用し、最大のものを選ぶ
@@ -29,7 +33,8 @@ from hitblow.env import HitBlowEnv
 from hitblow.features import N_ACTION, N_INPUT, N_STATE, action_features, state_features
 from hitblow.model import QNet
 
-DEFAULT_SAVE_AT = "100,200,300,400,500,750,1000,1500,2000,3000,4000,5000,7500,10000,15000,20000,25000,30000,40000"
+# 学習初期は変化が速いので細かく、その後は 500 エピソードごとに保存する
+DEFAULT_SAVE_AT = ",".join(str(e) for e in [*range(50, 3001, 50), *range(3500, 30001, 500)])
 
 
 class FeatureCache:
@@ -89,14 +94,25 @@ def epsilon(ep: int, a: argparse.Namespace) -> float:
     return a.eps_start + (a.eps_end - a.eps_start) * t
 
 
+def learning_rate(ep: int, a: argparse.Namespace) -> float:
+    """最初は大きな学習率で素早く基本を覚え、その後は対数的に下げてゆっくり上達させる。"""
+    if ep < a.lr_hold:
+        return a.lr
+    t = min(1.0, (ep - a.lr_hold) / max(1, a.lr_decay))
+    return a.lr * (a.lr_final / a.lr) ** t
+
+
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--seed", type=int, default=0)
-    p.add_argument("--episodes", type=int, default=40000)
+    p.add_argument("--episodes", type=int, default=30000)
     p.add_argument("--save-at", default=DEFAULT_SAVE_AT)
     p.add_argument("--save-every", type=int, default=0, help="このエピソード数ごとにも保存する")
     p.add_argument("--out", default="runs/main")
     p.add_argument("--lr", type=float, default=3e-4)
+    p.add_argument("--lr-final", type=float, default=3e-5, help="--lr-hold 以降、この値まで下げる")
+    p.add_argument("--lr-hold", type=int, default=600)
+    p.add_argument("--lr-decay", type=int, default=100)
     p.add_argument("--gamma", type=float, default=1.0)
     p.add_argument("--batch", type=int, default=64)
     p.add_argument("--buffer", type=int, default=50000)
@@ -108,7 +124,7 @@ def main() -> None:
     p.add_argument("--eps-end", type=float, default=0.05)
     p.add_argument("--eps-hold", type=int, default=300)
     p.add_argument("--eps-decay", type=int, default=10000)
-    p.add_argument("--log-every", type=int, default=500)
+    p.add_argument("--log-every", type=int, default=1000)
     a = p.parse_args()
 
     random.seed(a.seed)
@@ -138,6 +154,8 @@ def main() -> None:
 
     for ep in range(1, a.episodes + 1):
         eps = epsilon(ep - 1, a)
+        for group in opt.param_groups:
+            group["lr"] = learning_rate(ep - 1, a)
         env = HitBlowEnv(int(rng.integers(N_CODES)))
         pending: tuple[np.ndarray, float] | None = None
         last_fb = -1
@@ -193,7 +211,7 @@ def main() -> None:
             torch.save(online.state_dict(), out / f"ep{ep}.pt")
         if ep % a.log_every == 0:
             n = len(recent_turns)
-            print(f"ep {ep:6d}  eps {eps:.3f}  turns(train) {sum(recent_turns)/n:.2f}  "
+            print(f"ep {ep:6d}  eps {eps:.3f}  lr {learning_rate(ep - 1, a):.1e}  turns(train) {sum(recent_turns)/n:.2f}  "
                   f"solved {sum(recent_solved)/n:.1%}  updates {updates}  {time.time()-t0:.0f}s", flush=True)
             recent_turns.clear()
             recent_solved.clear()

@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
@@ -128,6 +129,7 @@ def to_markdown(r: dict) -> str:
 
 
 def main() -> None:
+    sys.stdout.reconfigure(encoding="utf-8")
     p = argparse.ArgumentParser()
     p.add_argument("--scan", type=Path)
     p.add_argument("--games", type=int, default=1000)

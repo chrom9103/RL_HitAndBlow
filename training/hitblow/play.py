@@ -35,18 +35,19 @@ def load_weights(path: str | Path) -> Weights:
 
 
 class FeatureMemo:
-    """同じ候補集合の特徴を使い回す(評価の高速化用)。"""
+    """候補集合が大きい局面(1〜2 手目に繰り返し現れる)の特徴を使い回す(評価の高速化用)。"""
 
-    def __init__(self, max_entries: int = 20000):
+    def __init__(self, min_size: int = 150, max_entries: int = 1000):
         self.data: dict[bytes, tuple[np.ndarray, np.ndarray]] = {}
+        self.min_size = min_size
         self.max_entries = max_entries
 
     def inputs(self, cands: np.ndarray, turn: int) -> np.ndarray:
-        key = cands.tobytes()
-        hit = self.data.get(key)
+        key = cands.tobytes() if len(cands) >= self.min_size else None
+        hit = self.data.get(key) if key is not None else None
         if hit is None:
             hit = (state_features(cands, 0), action_features(cands))
-            if len(self.data) < self.max_entries:
+            if key is not None and len(self.data) < self.max_entries:
                 self.data[key] = hit
         s, a = hit
         s = s.copy()
