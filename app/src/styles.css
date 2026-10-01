@@ -12,6 +12,7 @@
 
   --serif: 'Instrument Serif', 'Noto Sans JP', serif;
   --sans: 'DM Sans', 'Noto Sans JP', system-ui, sans-serif;
+  --mono: 'DM Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
   --radius: 14px;
   --gutter: 16px;
 
@@ -478,11 +479,10 @@ button {
 }
 
 .code {
-  font-family: var(--sans);
+  font-family: var(--mono);
   font-size: 18px;
   font-weight: 500;
-  letter-spacing: 0.14em;
-  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
   min-width: 4.6em;
 }
 
@@ -531,7 +531,7 @@ button {
   }
   .code {
     font-size: 16px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.04em;
   }
   .pip {
     width: 12px;
