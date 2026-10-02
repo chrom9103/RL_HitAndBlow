@@ -3,6 +3,8 @@
     python evaluate.py                      # difficulties.json の 3 難易度を 1,000 ゲームずつ計測 → results.md
     python evaluate.py --scan runs/main     # ラン内の全チェックポイントを計測(難易度の割り当てを決める用)
 
+- 比較のため、プレイヤー向けヒントのミニマックス法(hitblow/minimax.py)も同じ秘密の数字で打たせる。
+
 - 秘密の数字は固定シードで生成し、全員が同じ秘密で打つ。
 - 平均回数は、10 回で当てられなかったゲームを 11 回として数える。
 - 勝率は、ゲームのルールどおり「少ない回数で当てた方が勝ち、同じ回数・双方未達は引き分け」で判定する。
@@ -19,11 +21,12 @@ from pathlib import Path
 import numpy as np
 
 from hitblow.codes import N_CODES
+from hitblow.minimax import minimax_turns_all
 from hitblow.play import FAIL_TURNS, FeatureMemo, load_weights, play_agent, play_baseline, turns_to_solve
 
 ROOT = Path(__file__).resolve().parent
 DIFFICULTIES = ["easy", "normal", "hard"]
-LABELS = {"easy": "Easy", "normal": "Normal", "hard": "Hard", "baseline": "基準プレイヤー"}
+LABELS = {"easy": "Easy", "normal": "Normal", "hard": "Hard", "baseline": "基準プレイヤー", "minimax": "ミニマックス法(ヒント)"}
 
 
 def secrets(n: int, seed: int) -> np.ndarray:
@@ -84,17 +87,23 @@ def full(n: int, seed: int) -> None:
     turns = {"baseline": baseline_turns(secs, seed)}
     for d in DIFFICULTIES:
         turns[d] = agent_turns(run / f"{cfg[d]}.pt", secs, memo)
+    # ミニマックス法は決定的なので、全 5,040 通りの回数を一度に求めて引く
+    minimax_all = minimax_turns_all()
+    turns["minimax"] = minimax_all[secs]
 
     result = {
         "games": n,
         "seed": seed,
         "checkpoints": {d: cfg[d] for d in DIFFICULTIES},
         "summary": {k: summary(v) for k, v in turns.items()},
-        "vs_baseline": {d: dict(zip(["win", "draw", "lose"], wdl(turns[d], turns["baseline"]))) for d in DIFFICULTIES},
+        "vs_baseline": {d: dict(zip(["win", "draw", "lose"], wdl(turns[d], turns["baseline"])))
+                        for d in [*DIFFICULTIES, "minimax"]},
         "head_to_head": {
             f"{a}_vs_{b}": dict(zip(["win", "draw", "lose"], wdl(turns[a], turns[b])))
             for i, a in enumerate(DIFFICULTIES) for b in DIFFICULTIES[i + 1:]
         },
+        "vs_minimax": {d: dict(zip(["win", "draw", "lose"], wdl(turns[d], turns["minimax"]))) for d in DIFFICULTIES},
+        "minimax_all_secrets": summary(minimax_all),
         "distribution": {k: np.bincount(v, minlength=FAIL_TURNS + 1)[1:].tolist() for k, v in turns.items()},
     }
     (ROOT / "results.json").write_text(json.dumps(result, indent=2, ensure_ascii=False))
@@ -114,17 +123,24 @@ def to_markdown(r: dict) -> str:
         s, v = r["summary"][d], r["vs_baseline"][d]
         lines.append(f"| {LABELS[d]} | {r['checkpoints'][d]} | {s['mean_turns']:.2f} | {pct(s['solved_rate'])} | "
                      f"{pct(v['win'])} / {pct(v['draw'])} / {pct(v['lose'])} |")
+    m, mv = r["summary"]["minimax"], r["vs_baseline"]["minimax"]
+    lines.append(f"| ({LABELS['minimax']}) | — | {m['mean_turns']:.2f} | {pct(m['solved_rate'])} | "
+                 f"{pct(mv['win'])} / {pct(mv['draw'])} / {pct(mv['lose'])} |")
     b = r["summary"]["baseline"]
     lines.append(f"| (基準プレイヤー) | — | {b['mean_turns']:.2f} | {pct(b['solved_rate'])} | — |")
     lines += ["", "| 対戦 | 勝ち / 引き分け / 負け |", "|---|---|"]
     for k, v in r["head_to_head"].items():
         a, b2 = k.split("_vs_")
         lines.append(f"| {LABELS[a]} 対 {LABELS[b2]} | {pct(v['win'])} / {pct(v['draw'])} / {pct(v['lose'])} |")
+    for d, v in r["vs_minimax"].items():
+        lines.append(f"| {LABELS[d]} 対 {LABELS['minimax']} | {pct(v['win'])} / {pct(v['draw'])} / {pct(v['lose'])} |")
     lines += ["", "当てるまでの回数の分布(11 = 10 回で当てられず)", "",
               "| | " + " | ".join(str(i) for i in range(1, FAIL_TURNS + 1)) + " |",
               "|---" * (FAIL_TURNS + 1) + "|"]
-    for k in ["easy", "normal", "hard", "baseline"]:
+    for k in ["easy", "normal", "hard", "minimax", "baseline"]:
         lines.append(f"| {LABELS[k]} | " + " | ".join(str(c) for c in r["distribution"][k]) + " |")
+    a = r["minimax_all_secrets"]
+    lines += ["", f"参考: ミニマックス法を秘密の数字 5,040 通りすべてで打つと平均 {a['mean_turns']:.3f} 回・最悪 {a['max_turns']} 回"]
     return "\n".join(lines) + "\n"
 
 

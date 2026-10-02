@@ -30,6 +30,12 @@
       "mean_turns_solved": 5.264,
       "solved_rate": 1.0,
       "max_turns": 7
+    },
+    "minimax": {
+      "mean_turns": 5.334,
+      "mean_turns_solved": 5.334,
+      "solved_rate": 1.0,
+      "max_turns": 7
     }
   },
   "vs_baseline": {
@@ -47,6 +53,11 @@
       "win": 0.41,
       "draw": 0.32100000000000006,
       "lose": 0.269
+    },
+    "minimax": {
+      "win": 0.388,
+      "draw": 0.321,
+      "lose": 0.291
     }
   },
   "head_to_head": {
@@ -65,6 +76,29 @@
       "draw": 0.346,
       "lose": 0.504
     }
+  },
+  "vs_minimax": {
+    "easy": {
+      "win": 0.047,
+      "draw": 0.08199999999999996,
+      "lose": 0.871
+    },
+    "normal": {
+      "win": 0.179,
+      "draw": 0.33199999999999996,
+      "lose": 0.489
+    },
+    "hard": {
+      "win": 0.237,
+      "draw": 0.573,
+      "lose": 0.19
+    }
+  },
+  "minimax_all_secrets": {
+    "mean_turns": 5.343253968253968,
+    "mean_turns_solved": 5.343253968253968,
+    "solved_rate": 1.0,
+    "max_turns": 7
   },
   "distribution": {
     "baseline": [
@@ -114,6 +148,19 @@
       488,
       360,
       24,
+      0,
+      0,
+      0,
+      0
+    ],
+    "minimax": [
+      0,
+      0,
+      10,
+      115,
+      436,
+      409,
+      30,
       0,
       0,
       0,
