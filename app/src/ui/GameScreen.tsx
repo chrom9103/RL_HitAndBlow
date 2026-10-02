@@ -33,6 +33,7 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
   /** data が null の間は計算中 */
   const [hint, setHint] = useState<{ turn: number; data: Hint | null } | null>(null)
   const [hintTurns, setHintTurns] = useState<ReadonlySet<number>>(() => new Set())
+  const [hintOpen, setHintOpen] = useState(false)
 
   useEffect(() => {
     const cpu = createCpu(difficulty)
@@ -97,9 +98,21 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
       })
   }, [hint, match.player, playerTurn, turnNo])
 
+  const hintVisible = hintOpen && !!shownHint
+
+  const toggleHint = useCallback(() => {
+    if (!shownHint) {
+      requestHint()
+      setHintOpen(true)
+    } else {
+      setHintOpen((o) => !o)
+    }
+  }, [requestHint, shownHint])
+
   const fillHint = useCallback(() => {
     if (!playerTurn || !shownHint?.data) return
     setEntry(entryFromCode(shownHint.data.guess))
+    setHintOpen(false)
     setError(null)
   }, [playerTurn, shownHint])
 
@@ -164,6 +177,10 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
         e.preventDefault()
         selectSlot(Math.min(entry.cursor, CODE_LENGTH) + (e.key === 'ArrowLeft' ? -1 : 1))
       } else if (e.key === 'Escape') {
+        if (hintVisible) {
+          setHintOpen(false)
+          return
+        }
         setEntry(emptyEntry())
         setError(null)
       } else if (e.key === 'Enter') {
@@ -175,7 +192,7 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [addDigit, removeDigit, selectSlot, submit, entry.cursor])
+  }, [addDigit, removeDigit, selectSlot, submit, entry.cursor, hintVisible])
 
   const playerSolved = match.player.some((t) => t.hit === CODE_LENGTH)
   const status = fatal
@@ -226,14 +243,26 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
           <p className={`status ${fatal ? 'status--error' : ''}`} aria-live="polite">
             {status}
           </p>
-          <div className="hint" aria-live="polite">
-            {shownHint?.data ? (
-              <HintText hint={shownHint.data} onUse={playerTurn ? fillHint : undefined} />
-            ) : (
-              <button type="button" className="hint-button" onClick={requestHint} disabled={!playerTurn || !!shownHint}>
-                {shownHint ? '計算中…' : 'ヒント'}
-              </button>
-            )}
+          <button
+            type="button"
+            className="hint-toggle"
+            onClick={toggleHint}
+            disabled={!playerTurn}
+            aria-expanded={hintVisible}
+            aria-controls="hint-panel"
+          >
+            ヒント
+          </button>
+          <div id="hint-panel" className="hint" aria-live="polite" hidden={!hintVisible}>
+            {hintVisible &&
+              (shownHint.data ? (
+                <HintText hint={shownHint.data} onUse={playerTurn ? fillHint : undefined} />
+              ) : (
+                <p className="hint__text">計算中…</p>
+              ))}
+            <button type="button" className="hint__close" onClick={() => setHintOpen(false)} aria-label="ヒントを閉じる">
+              ×
+            </button>
           </div>
           <div className={`entry ${playerTurn ? '' : 'is-waiting'}`} role="group" aria-label="入力中の数字">
             {entry.digits.map((d, i) => (

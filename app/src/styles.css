@@ -583,6 +583,7 @@ button {
 /* ---------- 入力 ---------- */
 
 .dock {
+  position: relative;
   padding: 20px 16px 16px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -591,6 +592,7 @@ button {
 
 .status {
   margin: 0 0 12px;
+  padding: 0 56px; /* 右上のヒントボタンと重ならないように */
   font-size: 14px;
   color: var(--muted);
   text-align: center;
@@ -601,36 +603,69 @@ button {
   color: var(--error);
 }
 
-/* ヒント(ミニマックス法)。表示の前後で入力欄の位置が動かないよう高さを確保する */
-.hint {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 3.4em;
-  margin: 0 0 8px;
-  text-align: center;
-}
-
-.hint-button {
-  min-height: 32px;
-  padding: 0 16px;
-  border: 1px solid var(--line);
+/* ヒント(ミニマックス法)。頼りすぎないよう、右上の控えめなボタンから開く */
+.hint-toggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 0;
   border-radius: 999px;
-  background: var(--bg);
-  color: var(--accent);
-  font-size: 13px;
-  font-weight: 500;
+  background: none;
+  color: var(--muted);
+  font-size: 12px;
+  opacity: 0.7;
   cursor: pointer;
 }
 
-.hint-button:hover:not(:disabled) {
-  border-color: var(--accent);
+.hint-toggle:hover:not(:disabled),
+.hint-toggle[aria-expanded='true'] {
+  color: var(--accent);
+  opacity: 1;
 }
 
-.hint-button:disabled {
+.hint-toggle:disabled {
   cursor: default;
+  opacity: 0.35;
+}
+
+.hint {
+  position: absolute;
+  top: 40px;
+  right: 8px;
+  z-index: 5;
+  width: min(300px, calc(100% - 16px));
+  padding: 12px 36px 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--raised);
+  box-shadow: 0 12px 32px -16px rgb(20 20 19 / 0.35);
+  text-align: left;
+}
+
+.hint[hidden] {
+  display: none;
+}
+
+.hint__close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
   color: var(--muted);
-  opacity: 0.6;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hint__close:hover {
+  color: var(--ink);
 }
 
 .hint__text {
@@ -927,10 +962,6 @@ button {
   .entry__slot {
     height: 48px;
     font-size: 36px;
-  }
-  .hint {
-    min-height: 3em;
-    margin-bottom: 4px;
   }
   .error {
     min-height: 2.6em;
