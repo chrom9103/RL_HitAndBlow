@@ -1266,3 +1266,35 @@ button {
     min-height: 46px;
   }
 }
+
+/* ---------- 横長で高さが 512px 未満 ----------
+   1 画面に収めようとすると部品が潰れるので、収めるのをやめてページのスクロールを許す */
+@media (orientation: landscape) and (max-height: 511px) {
+  .top {
+    height: auto;
+  }
+  .top .rules {
+    overflow: visible;
+  }
+  .top .rules summary {
+    position: static;
+  }
+  /* 広い画面の 2 列: 中身の高さのまま並べる */
+  .game__body {
+    flex: 1 0 auto;
+    min-height: auto;
+  }
+  .game__body > .dock {
+    min-height: auto;
+  }
+  .keypad {
+    flex: none;
+    min-height: 0;
+    grid-auto-rows: 52px;
+    grid-template-rows: none;
+  }
+  /* 狭い画面: 入力パネルを画面下に固定すると画面のほとんどを覆うので、固定しない */
+  .dock {
+    position: relative; /* ヒントのボタンと吹き出しの基準は残す */
+  }
+}
