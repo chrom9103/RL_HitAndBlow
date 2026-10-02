@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { DIFFICULTIES, type Difficulty, type SelectableDifficulty } from '../game/difficulty'
+import { DIFFICULTIES, type Difficulty } from '../game/difficulty'
 import { DifficultyPicker } from './DifficultyPicker'
 import { Logo } from './marks'
 import { RulesList } from './Rules'
 
 export function TopScreen({ onStart }: { onStart: (d: Difficulty) => void }) {
-  const [difficulty, setDifficulty] = useState<SelectableDifficulty>('normal')
+  const [difficulty, setDifficulty] = useState<Difficulty>('normal')
 
   // ← → で難易度を変え、Enter で始める。ボタンや「遊び方」にフォーカスがあるときはそちらに任せる
   useEffect(() => {
@@ -17,6 +17,11 @@ export function TopScreen({ onStart }: { onStart: (d: Difficulty) => void }) {
         onStart(difficulty)
       } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !onControl) {
         e.preventDefault()
+        if (difficulty === 'max') {
+          // 隠しモードの Max は Hard の右隣として扱う(← で Hard に戻る)
+          if (e.key === 'ArrowLeft') setDifficulty('hard')
+          return
+        }
         const i = DIFFICULTIES.indexOf(difficulty) + (e.key === 'ArrowLeft' ? -1 : 1)
         setDifficulty(DIFFICULTIES[Math.max(0, Math.min(DIFFICULTIES.length - 1, i))])
       }
