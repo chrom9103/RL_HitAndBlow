@@ -166,6 +166,13 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
     setError(null)
   }, [input, match.player, playerTurn])
 
+  const focusZone = useCallback((zone: 'entry' | 'keypad') => {
+    dockRef.current?.querySelector<HTMLElement>(`.${zone} [tabindex="0"]`)?.focus()
+  }, [])
+
+  // 開始時はテンキーにフォーカスを置き、すぐ矢印キーで操作できるようにする
+  useEffect(() => focusZone('keypad'), [focusZone])
+
   // キーボード入力
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -182,6 +189,10 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
       } else if (e.key === 'Backspace' || e.key === 'Delete') {
         e.preventDefault()
         removeDigit()
+      } else if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && e.target === document.body) {
+        // フォーカスがどこにもないときは、↑ で入力欄、↓ でテンキーに入る
+        e.preventDefault()
+        focusZone(e.key === 'ArrowUp' ? 'entry' : 'keypad')
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         e.preventDefault()
         selectSlot(Math.min(entry.cursor, CODE_LENGTH) + (e.key === 'ArrowLeft' ? -1 : 1))
@@ -201,11 +212,7 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [addDigit, removeDigit, selectSlot, submit, entry.cursor, hintVisible])
-
-  const focusZone = useCallback((zone: 'entry' | 'keypad') => {
-    dockRef.current?.querySelector<HTMLElement>(`.${zone} [tabindex="0"]`)?.focus()
-  }, [])
+  }, [addDigit, removeDigit, selectSlot, submit, focusZone, entry.cursor, hintVisible])
 
   useEffect(() => {
     const onFocusIn = (e: FocusEvent) => {
