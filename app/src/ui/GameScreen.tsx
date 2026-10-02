@@ -170,8 +170,8 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
     dockRef.current?.querySelector<HTMLElement>(`.${zone} [tabindex="0"]`)?.focus()
   }, [])
 
-  // 開始時はテンキーにフォーカスを置き、すぐ矢印キーで操作できるようにする
-  useEffect(() => focusZone('keypad'), [focusZone])
+  // 開始時は千の位にフォーカスを置き、すぐキーボードで操作できるようにする
+  useEffect(() => focusZone('entry'), [focusZone])
 
   // キーボード入力
   useEffect(() => {
