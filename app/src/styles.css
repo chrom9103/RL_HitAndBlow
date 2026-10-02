@@ -673,10 +673,24 @@ button {
   font-family: var(--serif);
   font-size: 44px;
   line-height: 1;
+  padding: 0;
+  border-width: 0 0 2px;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.entry__slot:hover:not(:disabled):not(.is-cursor) {
+  border-bottom-color: var(--muted);
 }
 
 .entry__slot.is-cursor {
   border-bottom-color: var(--accent);
+}
+
+.entry__slot:disabled {
+  cursor: default;
 }
 
 .entry.is-waiting .entry__slot {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CODE_LENGTH, randomCode, validateGuess } from '../game/codes'
 import { DIFFICULTY_LABEL, type Difficulty } from '../game/difficulty'
+import { deleteDigit, emptyEntry, entryFromCode, entryValue, moveCursor, typeDigit } from '../game/entry'
 import { applyGuess, createMatch, type Match } from '../game/match'
 import { createCpu, type Cpu } from '../cpu/client'
 import { createHinter, type Hinter } from '../hint/client'
@@ -19,10 +20,12 @@ interface Props {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 /** CPU の手番の「間」(0.6〜1.2 秒) */
 const cpuDelay = () => 600 + Math.random() * 600
+const PLACE_LABEL = ['千の位', '百の位', '十の位', '一の位']
 
 export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
   const [match, setMatch] = useState<Match>(() => createMatch(randomCode()))
-  const [input, setInput] = useState('')
+  const [entry, setEntry] = useState(emptyEntry)
+  const input = entryValue(entry)
   const [error, setError] = useState<string | null>(null)
   const [fatal, setFatal] = useState(false)
   const cpuRef = useRef<Cpu | null>(null)
@@ -96,34 +99,43 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
 
   const fillHint = useCallback(() => {
     if (!playerTurn || !shownHint?.data) return
-    setInput(shownHint.data.guess)
+    setEntry(entryFromCode(shownHint.data.guess))
     setError(null)
   }, [playerTurn, shownHint])
 
   const addDigit = useCallback(
     (d: string) => {
       if (!playerTurn) return
-      if (input.includes(d)) {
+      if (entry.digits.some((x, i) => x === d && i !== entry.cursor)) {
         setError(`「${d}」はもう入っています。同じ数字は2回使えません。`)
         return
       }
-      if (input.length >= CODE_LENGTH) {
+      if (entry.cursor >= CODE_LENGTH) {
         setError(`${CODE_LENGTH}桁まで入力できます。「決定」で予想を送ってください。`)
         return
       }
-      setInput(input + d)
+      setEntry(typeDigit(entry, d))
       setError(null)
     },
-    [input, playerTurn],
+    [entry, playerTurn],
   )
 
   const removeDigit = useCallback(() => {
-    setInput((v) => v.slice(0, -1))
+    setEntry(deleteDigit)
     setError(null)
   }, [])
 
+  const selectSlot = useCallback(
+    (i: number) => {
+      if (!playerTurn) return
+      setEntry((e) => moveCursor(e, i))
+    },
+    [playerTurn],
+  )
+
   const submit = useCallback(() => {
     if (!playerTurn) return
+    // 空欄は entryValue に含まれないので、埋まっていない桁があれば桁数不足になる
     const problem = validateGuess(input)
     if (problem) {
       setError(problem)
@@ -134,7 +146,7 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
       return
     }
     setMatch((m) => applyGuess(m, 'player', input))
-    setInput('')
+    setEntry(emptyEntry())
     setError(null)
   }, [input, match.player, playerTurn])
 
@@ -148,8 +160,11 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
       } else if (e.key === 'Backspace' || e.key === 'Delete') {
         e.preventDefault()
         removeDigit()
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault()
+        selectSlot(Math.min(entry.cursor, CODE_LENGTH) + (e.key === 'ArrowLeft' ? -1 : 1))
       } else if (e.key === 'Escape') {
-        setInput('')
+        setEntry(emptyEntry())
         setError(null)
       } else if (e.key === 'Enter') {
         // ボタンにフォーカスがあるときはボタン自身の動作に任せる
@@ -160,7 +175,7 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [addDigit, removeDigit, submit])
+  }, [addDigit, removeDigit, selectSlot, submit, entry.cursor])
 
   const playerSolved = match.player.some((t) => t.hit === CODE_LENGTH)
   const status = fatal
@@ -220,11 +235,21 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
               </button>
             )}
           </div>
-          <div className={`entry ${playerTurn ? '' : 'is-waiting'}`} aria-label={`入力中の数字: ${input || 'なし'}`}>
-            {Array.from({ length: CODE_LENGTH }, (_, i) => (
-              <span key={i} className={`entry__slot ${i === input.length && playerTurn ? 'is-cursor' : ''}`}>
-                {input[i] ?? ''}
-              </span>
+          <div className={`entry ${playerTurn ? '' : 'is-waiting'}`} role="group" aria-label="入力中の数字">
+            {entry.digits.map((d, i) => (
+              <button
+                key={i}
+                type="button"
+                className={`entry__slot ${i === entry.cursor && playerTurn ? 'is-cursor' : ''}`}
+                // クリックでフォーカスを奪わない(Enter での決定を妨げないため)
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => selectSlot(i)}
+                disabled={!playerTurn}
+                aria-label={`${PLACE_LABEL[i]}: ${d || '空欄'}`}
+                aria-pressed={i === entry.cursor}
+              >
+                {d}
+              </button>
             ))}
           </div>
           <p className="error" role="alert">
