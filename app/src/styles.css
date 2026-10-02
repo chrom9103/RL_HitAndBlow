@@ -629,22 +629,28 @@ button {
     width: 22px;
     font-size: 13px;
   }
-  /* 入力パネルは縦いっぱい。テンキーは下に寄せ、入力欄は残りの高さの中央に置く */
+  /* 入力パネルは縦いっぱい(履歴と下端を揃える)。中身は「状況・入力欄・テンキー」をひとかたまりにして上下中央に置く */
   .game__body > .dock {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     min-height: 0;
     margin-top: 0;
   }
   .dock__entry {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    justify-content: center;
+    flex: none;
   }
-  /* 高さに余裕があればキーを大きく(1 段 80px まで)、足りなければ 1 段 52px まで縮める */
+  /* 入力中の数字は主役なので、高さに余裕があれば大きくする */
+  .dock .entry {
+    grid-template-columns: repeat(4, clamp(56px, 7vh, 68px));
+  }
+  .dock .entry__slot {
+    height: clamp(64px, 9vh, 96px);
+    font-size: clamp(44px, 6.5vh, 68px);
+  }
+  /* キーは 1 段 72px まで。高さが足りなければ 1 段 52px まで縮める */
   .keypad {
-    flex: 0 1 344px;
+    flex: 0 1 312px;
     min-height: 232px;
     grid-template-rows: repeat(4, 1fr);
   }
