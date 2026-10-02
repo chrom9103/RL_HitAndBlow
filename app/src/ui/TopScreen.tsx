@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { DIFFICULTIES, type Difficulty } from '../game/difficulty'
+import { DIFFICULTIES, type Difficulty, type SelectableDifficulty } from '../game/difficulty'
 import { DifficultyPicker } from './DifficultyPicker'
 import { Logo } from './marks'
 import { RulesList } from './Rules'
 
 export function TopScreen({ onStart }: { onStart: (d: Difficulty) => void }) {
-  const [difficulty, setDifficulty] = useState<Difficulty>('normal')
+  const [difficulty, setDifficulty] = useState<SelectableDifficulty>('normal')
 
   // ← → で難易度を変え、Enter で始める。ボタンや「遊び方」にフォーカスがあるときはそちらに任せる
   useEffect(() => {

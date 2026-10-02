@@ -1,5 +1,5 @@
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
-import { DIFFICULTIES, DIFFICULTY_LABEL, type Difficulty } from '../game/difficulty'
+import { DIFFICULTIES, DIFFICULTY_LABEL, type SelectableDifficulty as Difficulty } from '../game/difficulty'
 
 interface Props {
   value: Difficulty

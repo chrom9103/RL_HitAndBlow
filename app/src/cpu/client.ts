@@ -49,7 +49,10 @@ export function createCpu(difficulty: Difficulty): Cpu {
 
   const ready = loadManifest().then(async (manifest) => {
     const buffer = (await loadWeights(difficulty, manifest)).slice(0)
-    worker.postMessage({ type: 'load', buffer, sizes: manifest.sizes } satisfies WorkerRequest, [buffer])
+    // Max は重みではなく最適戦略の決定木(tree.ts)
+    const msg: WorkerRequest =
+      difficulty === 'max' ? { type: 'loadTree', buffer } : { type: 'load', buffer, sizes: manifest.sizes }
+    worker.postMessage(msg, [buffer])
   })
 
   return {

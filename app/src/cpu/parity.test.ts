@@ -12,7 +12,7 @@ import parity from './__fixtures__/parity.json'
 const weightsDir = fileURLToPath(new URL('../../public/weights/', import.meta.url))
 const manifest = JSON.parse(readFileSync(weightsDir + 'manifest.json', 'utf8')) as Manifest
 const layers = Object.fromEntries(
-  Object.entries(manifest.files).map(([d, file]) => {
+  Object.entries(manifest.files).filter(([d]) => d !== 'max').map(([d, file]) => {
     const buf = readFileSync(weightsDir + file)
     return [d, parseWeights(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength), manifest.sizes)]
   }),
