@@ -562,66 +562,13 @@ button {
   min-height: 60px;
 }
 
+/* スコアは履歴の見出しにあるので、上のバーとの間を少しだけ空ける */
+.game .game__bar {
+  margin-bottom: 12px;
+}
+
 .game__bar .wordmark {
   font-size: 24px;
-}
-
-.scoreboard {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 20px;
-  padding: 14px 0 18px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 20px;
-}
-
-.score {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  color: var(--muted);
-  transition: color 0.2s;
-}
-
-.score.is-active {
-  color: var(--ink);
-}
-
-.score__who {
-  font-size: 14px;
-  font-weight: 500;
-  position: relative;
-}
-
-.score.is-active .score__who::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -6px;
-  height: 2px;
-  border-radius: 1px;
-  background: var(--accent);
-}
-
-.score__count {
-  font-size: 14px;
-}
-
-.score__count b {
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: 40px;
-  line-height: 1;
-  margin-right: 2px;
-  font-variant-numeric: tabular-nums;
-}
-
-.score__sep {
-  font-family: var(--serif);
-  font-size: 28px;
-  color: var(--line);
 }
 
 .game__body {
@@ -719,11 +666,49 @@ button {
 }
 
 .history__title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
   margin: 0 0 8px;
   font-size: 13px;
   font-weight: 500;
   color: var(--muted);
   letter-spacing: 0.04em;
+  transition: color 0.2s;
+}
+
+/* ゲーム中は見出しがスコアを兼ねる。手番の側は濃くして名前に下線を引く */
+.history__title.is-active {
+  color: var(--ink);
+}
+
+.history__who {
+  position: relative;
+}
+
+.history__title.is-active .history__who::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+}
+
+.history__count {
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.history__count b {
+  margin-right: 2px;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .history__list {
@@ -1238,13 +1223,6 @@ button {
   }
   .game__bar {
     min-height: 52px;
-  }
-  .scoreboard {
-    padding: 6px 0 12px;
-    margin-bottom: 12px;
-  }
-  .score__count b {
-    font-size: 34px;
   }
   .history__row {
     height: 30px;

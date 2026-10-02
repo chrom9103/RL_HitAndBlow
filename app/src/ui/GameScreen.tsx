@@ -267,28 +267,18 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
       </header>
       <InfoDialog open={infoOpen} onClose={() => setInfoOpen(false)} />
 
-      <div className="scoreboard" aria-label="回数">
-        <div className={`score ${playerTurn ? 'is-active' : ''}`}>
-          <span className="score__who">あなた</span>
-          <span className="score__count">
-            <b>{match.player.length}</b>回
-          </span>
-        </div>
-        <span className="score__sep" aria-hidden="true">
-          /
-        </span>
-        <div className={`score ${match.next === 'cpu' ? 'is-active' : ''}`}>
-          <span className="score__who">CPU</span>
-          <span className="score__count">
-            <b>{match.cpu.length}</b>回
-          </span>
-        </div>
-      </div>
-
       <div className="game__body">
         <div className="histories">
-          <History title="あなた" turns={match.player} />
-          <History title="CPU" turns={match.cpu} hidden pending={match.next === 'cpu'} pendingLabel="考え中" />
+          <History title="あなた" turns={match.player} count={match.player.length} active={playerTurn} />
+          <History
+            title="CPU"
+            turns={match.cpu}
+            count={match.cpu.length}
+            active={match.next === 'cpu'}
+            hidden
+            pending={match.next === 'cpu'}
+            pendingLabel="考え中"
+          />
         </div>
 
         <section ref={dockRef} className="dock" aria-label="予想の入力">

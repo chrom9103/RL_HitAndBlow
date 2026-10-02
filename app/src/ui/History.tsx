@@ -14,14 +14,25 @@ interface Props {
   secret?: string
   /** 予想した行だけを表示する(結果画面用) */
   compact?: boolean
+  /** 見出しに出す回数(ゲーム中のスコア) */
+  count?: number
+  /** この側の手番(見出しに下線を引く) */
+  active?: boolean
 }
 
-export function History({ title, turns, hidden = false, pending = false, pendingLabel, secret, compact = false }: Props) {
+export function History({ title, turns, hidden = false, pending = false, pendingLabel, secret, compact = false, count, active = false }: Props) {
   const rows = Array.from({ length: compact ? turns.length : MAX_TURNS }, (_, i) => turns[i])
   const solvedAt = turns.findIndex((t) => t.hit === 4)
   return (
     <section className="history" aria-label={`${title}の履歴`}>
-      <h2 className="history__title">{title}</h2>
+      <h2 className={`history__title ${active ? 'is-active' : ''}`}>
+        <span className="history__who">{title}</span>
+        {count !== undefined && (
+          <span className="history__count">
+            <b>{count}</b>回
+          </span>
+        )}
+      </h2>
       <ol className="history__list">
         {rows.map((t, i) => {
           const isPending = pending && i === turns.length
