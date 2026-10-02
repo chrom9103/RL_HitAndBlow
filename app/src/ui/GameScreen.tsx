@@ -301,17 +301,19 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
               ×
             </button>
           </div>
-          <EntrySlots entry={entry} active={playerTurn} onSelect={selectSlot} onExitDown={() => focusZone('keypad')} />
-          <p className="error" role="alert">
-            {error && (
-              <>
-                <span className="error__mark" aria-hidden="true">
-                  !
-                </span>
-                {error}
-              </>
-            )}
-          </p>
+          <div className="dock__entry">
+            <EntrySlots entry={entry} active={playerTurn} onSelect={selectSlot} onExitDown={() => focusZone('keypad')} />
+            <p className="error" role="alert">
+              {error && (
+                <>
+                  <span className="error__mark" aria-hidden="true">
+                    !
+                  </span>
+                  {error}
+                </>
+              )}
+            </p>
+          </div>
           <Keypad
             value={input}
             disabled={!playerTurn}

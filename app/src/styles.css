@@ -347,6 +347,15 @@ button {
   padding: 8px var(--gutter) 24px;
 }
 
+/* 画面の高さいっぱいに広げ、入力パネルの下に余白を残さない */
+.game {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 .game__bar {
   display: flex;
   align-items: center;
@@ -417,19 +426,51 @@ button {
 }
 
 .game__body {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   gap: 24px;
+}
+
+/* 狭い画面: 履歴が短くても入力パネルは画面の下端に置く */
+.game__body > .dock {
+  margin-top: auto;
 }
 
 @media (min-width: 880px) {
   .game__body {
+    display: grid;
     grid-template-columns: 1fr 340px;
-    align-items: start;
+    align-items: stretch;
     gap: 40px;
+    /* 内容の高さではなく残りの高さに合わせる(テンキーが縮めるように) */
+    flex: 1 1 0px;
+    min-height: 0;
   }
-  .dock {
-    position: sticky;
-    top: 16px;
+  .histories {
+    align-self: start;
+  }
+  /* 入力パネルは縦いっぱい。テンキーは下に寄せ、入力欄は残りの高さの中央に置く */
+  .game__body > .dock {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin-top: 0;
+  }
+  .dock__entry {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+  }
+  /* 高さに余裕があればキーを大きく(1 段 80px まで)、足りなければ 1 段 52px まで縮める */
+  .keypad {
+    flex: 0 1 344px;
+    min-height: 232px;
+    grid-template-rows: repeat(4, 1fr);
+  }
+  .key {
+    min-height: 0;
   }
 }
 
