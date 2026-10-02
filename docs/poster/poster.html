@@ -715,11 +715,11 @@ const pipHTML = (hit) => hit
   })
   el(svg, 'line', { x1: L, x2: R, y1: B, y2: B, class: 'axis' })
   el(svg, 'text', { x: (L + R) / 2, y: B + 32, 'text-anchor': 'middle', class: 'lbl' }, '学習したエピソード数(ゲーム数)')
-  // 基準線
-  el(svg, 'line', { x1: L, x2: R, y1: y(5.46), y2: y(5.46), stroke: C.ref, 'stroke-width': 1.2, 'stroke-dasharray': '6 4' })
-  el(svg, 'text', { x: L + 4, y: y(5.46) - 4, class: 'lbl-s', 'font-size': 8.5 }, '基準プレイヤー 5.46')
-  el(svg, 'line', { x1: L, x2: R, y1: y(5.21), y2: y(5.21), stroke: C.ref, 'stroke-width': 1.2, 'stroke-dasharray': '2 3' })
-  el(svg, 'text', { x: L + 4, y: y(5.21) + 11, class: 'lbl-s', 'font-size': 8.5 }, '理論上の最善 約 5.21')
+  // 基準線(線は赤、ラベルは黒)。線の種類でも区別できるよう、基準プレイヤーは破線・理論上の最善は点線
+  el(svg, 'line', { x1: L, x2: R, y1: y(5.46), y2: y(5.46), stroke: C.neg, 'stroke-width': 1.6, 'stroke-dasharray': '6 4' })
+  el(svg, 'text', { x: L + 4, y: y(5.46) - 4, 'font-size': 8.5, 'font-weight': 700 }, '基準プレイヤー 5.46')
+  el(svg, 'line', { x1: L, x2: R, y1: y(5.21), y2: y(5.21), stroke: C.neg, 'stroke-width': 1.6, 'stroke-dasharray': '2 3' })
+  el(svg, 'text', { x: L + 4, y: y(5.21) + 11, 'font-size': 8.5, 'font-weight': 700 }, '理論上の最善 約 5.21')
   if (!CURVE.length) return
   el(svg, 'polyline', { points: CURVE.map(([e, t]) => `${x(e)},${y(t)}`).join(' '), fill: 'none', stroke: C['ink-2'], 'stroke-width': 1.4, 'stroke-linejoin': 'round' })
   CURVE.forEach(([e, t]) => el(svg, 'circle', { cx: x(e), cy: y(t), r: 1.6, fill: C['ink-2'] }))
