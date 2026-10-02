@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hit &amp; Blow 強化学習ポスター</title>
+<!--
+  文化祭展示用ポスター(2 枚組)。PDF は build.ps1 で作る。
+  - 四六判(788 × 1091 mm): poster.html     → poster-shiroku.pdf
+  - A4(210 × 297 mm):    poster.html?a4  → poster-a4.pdf(同じレイアウトを縮小)
+  寸法はすべて rem。1rem = 用紙の横幅 / 116。
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script>
+  // ?a4 で A4 用に切り替える(用紙サイズと 1rem の大きさだけが変わる)
+  const A4 = /[?&]a4(&|$)/.test(location.search)
+  if (A4) document.documentElement.classList.add('a4')
+  document.write(`<style>@page{size:${A4 ? '210mm 297mm' : '788mm 1091mm'};margin:0}</style>`)
+</script>
+<style>
+  :root {
+    --ink: #141413;
+    --ink-2: #3d3c38;
+    --muted: #6b6a63;
+    --line: #d9d5c8;
+    --paper: #ffffff;
+    --surface: #f3f1ea;
+    --accent: #4a6a94;
+    --accent-soft: #e4eaf2;
+    --bad-soft: #fbe4dc;
+    --bad: #a3412f;
+    /* 難易度の色(カテゴリ色は固定順: 1 青 / 2 橙 / 3 緑) */
+    --hard: #2a78d6;
+    --normal: #eb6834;
+    --easy: #1baf7a;
+    --ref: #8a887f;
+    --pos: #2a78d6;
+    --neg: #e34948;
+    --sans: 'Noto Sans JP', system-ui, sans-serif;
+    --serif: 'Instrument Serif', 'Noto Sans JP', serif;
+    --mono: 'DM Mono', ui-monospace, Consolas, monospace;
+    color-scheme: light;
+  }
+  /* 1rem = 用紙の横幅 / 116 */
+  html { font-size: calc(788mm / 116); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html.a4 { font-size: calc(210mm / 116); }
+  @media screen {
+    html, html.a4 { font-size: calc(100vw / 116); }
+    body { background: #8a887f; }
+    .sheet { margin: 0 auto 2rem; }
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans);
+         font-size: 1.22rem; line-height: 1.72; font-feature-settings: "palt" 1; }
+  p { margin: 0 0 .7em; }
+  p:last-child { margin-bottom: 0; }
+  b, strong { font-weight: 700; }
+  .mono { font-family: var(--mono); }
+  .num { font-family: var(--mono); font-weight: 500; }
+  .muted { color: var(--muted); }
+  .small { font-size: 1.06rem; line-height: 1.65; }
+  .tiny { font-size: .95rem; line-height: 1.55; }
+
+  /* 四六判 788:1091 → 116rem : 160.6rem。A4 は縦が少し長い */
+  .sheet { width: 116rem; height: 160.6rem; padding: 4.2rem 4.4rem 3rem; background: var(--paper);
+           display: flex; flex-direction: column; gap: 2.6rem; overflow: hidden; position: relative;
+           break-after: page; }
+  .sheet:last-child { break-after: auto; }
+  html.a4 .sheet { height: 164.06rem; }
+
+  /* ---------- 見出し ---------- */
+  .masthead { display: grid; grid-template-columns: auto 1fr auto; gap: 3rem; align-items: center;
+              padding-bottom: 2.4rem; border-bottom: .4rem solid var(--ink); }
+  .masthead .symbol { width: 11rem; height: 11rem; }
+  .kicker { font-size: 1.5rem; font-weight: 700; color: var(--accent); letter-spacing: .14em; margin: 0 0 .3rem; }
+  h1 { margin: 0; font-size: 5.4rem; line-height: 1.22; font-weight: 900; letter-spacing: .01em; }
+  h1 .wordmark { font-family: var(--serif); font-weight: 400; font-size: 1.2em; letter-spacing: 0; white-space: nowrap; }
+  h1 .wordmark em { color: var(--accent); }
+  .lede { margin: 1.1rem 0 0; font-size: 1.6rem; line-height: 1.7; color: var(--ink-2); max-width: none; }
+  .sheetno { text-align: center; font-family: var(--serif); font-size: 6rem; line-height: 1; color: var(--accent); }
+  .sheetno small { display: block; font-family: var(--sans); font-size: 1.1rem; color: var(--muted); letter-spacing: .1em; margin-top: .4rem; }
+  .masthead.compact .symbol { width: 8rem; height: 8rem; }
+  .masthead.compact h1 { font-size: 3.8rem; }
+
+  /* ---------- 段組み: 3 トピック × 2 段。各段の見出しの高さをそろえる ---------- */
+  .topics { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-rows: 1fr 1fr; align-items: start; gap: 3.2rem 3rem; }
+  section.card { min-width: 0; }
+  .card h2 { display: flex; align-items: baseline; gap: 1rem; margin: 0 0 1.1rem; font-size: 2.3rem; line-height: 1.3;
+             font-weight: 900; padding-bottom: .6rem; border-bottom: .16rem solid var(--line); }
+  .card h2 .no { font-family: var(--serif); font-weight: 400; font-size: 3.1rem; color: var(--accent); line-height: 1; min-width: 2.8rem; }
+  .card h2 .en { margin-left: auto; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.55rem; color: var(--muted); white-space: nowrap; }
+  .card h3 { margin: 1.3rem 0 .5rem; font-size: 1.45rem; font-weight: 700; }
+  figure { margin: 1.1rem 0; }
+  figure svg { display: block; width: 100%; height: auto; overflow: visible; }
+  figcaption { font-size: 1rem; line-height: 1.6; color: var(--muted); margin-top: .6rem; }
+  figcaption b { color: var(--ink-2); }
+
+  .box { background: var(--surface); border-radius: 1rem; padding: 1.1rem 1.4rem; }
+  .box.accent { background: var(--accent-soft); }
+  .box h4 { margin: 0 0 .3rem; font-size: 1.3rem; font-weight: 700; }
+  .keyword { font-weight: 700; color: var(--accent); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+
+  /* 数式 */
+  .eq { font-family: var(--serif); font-size: 2.2rem; text-align: center; margin: .2rem 0 .6rem; line-height: 1.4; white-space: nowrap; }
+  .eq .op { font-family: var(--sans); font-size: .75em; margin: 0 .25em; }
+  .eq sub { font-size: .55em; }
+
+  /* 表 */
+  table { border-collapse: collapse; width: 100%; font-size: 1.06rem; line-height: 1.5; }
+  th, td { padding: .45rem .6rem; text-align: left; vertical-align: top; border-bottom: .08rem solid var(--line); }
+  thead th { font-weight: 700; border-bottom: .16rem solid var(--ink); font-size: .98rem; color: var(--ink-2); vertical-align: bottom; }
+  tbody th { font-weight: 700; white-space: nowrap; }
+  td.r, th.r { text-align: right; }
+
+  /* 対局の再現 */
+  .trace td, .trace th { padding: .3rem .5rem; vertical-align: middle; }
+  .trace thead th { text-align: center; font-size: 1.15rem; }
+  .trace td.t { color: var(--muted); font-family: var(--mono); font-size: .95rem; width: 2rem; text-align: center; }
+  .trace .cell { display: grid; grid-template-columns: auto 1fr auto; gap: .5rem; align-items: center; }
+  .trace .g { font-family: var(--mono); font-size: 1.3rem; font-weight: 500; letter-spacing: .04em; }
+  .trace .fb { display: flex; gap: .15rem; align-items: center; }
+  .trace .left { font-family: var(--mono); font-size: .98rem; color: var(--ink-2); text-align: right; }
+  .trace td.bad { background: var(--bad-soft); }
+  .trace td.good { background: var(--accent-soft); }
+  .trace td.win .g { color: var(--accent); }
+  .trace tfoot td { border-bottom: none; font-weight: 700; text-align: center; font-size: 1.1rem; padding-top: .6rem; }
+  .tag { display: inline-block; font-size: .85rem; line-height: 1; padding: .25rem .45rem; border-radius: .3rem;
+         vertical-align: .1rem; font-family: var(--sans); font-weight: 700; letter-spacing: 0; }
+  .tag.bad { background: var(--bad-soft); color: var(--bad); }
+  .tag.good { background: var(--accent-soft); color: var(--accent); }
+  .pip { width: .95rem; height: .95rem; flex: none; }
+
+  /* DQN の工夫 */
+  .tech { display: grid; grid-template-columns: 13rem 1fr; gap: 1.2rem; align-items: start; padding: 1rem 0; border-top: .08rem solid var(--line); }
+  .tech:first-of-type { border-top: none; padding-top: .3rem; }
+  .tech svg { width: 100%; display: block; }
+  .tech h3 { margin: 0 0 .2rem; }
+  .tech p { margin: 0; }
+
+  .masthead.compact { grid-template-columns: auto 1fr auto auto; }
+  .qr { display: grid; grid-template-columns: auto auto; gap: 1.2rem; align-items: center;
+        background: var(--accent-soft); border-radius: 1rem; padding: .9rem 1.4rem .9rem .9rem; }
+  .qr svg { width: 8rem; height: 8rem; display: block; }
+  .qr .qr-title { margin: 0 0 .2rem; font-size: 1.35rem; font-weight: 700; }
+  .qr p { margin: 0; }
+  .footer { display: flex; justify-content: space-between; align-items: center; font-size: 1.05rem; color: var(--muted);
+            border-top: .12rem solid var(--line); padding-top: 1rem; margin-top: auto; }
+  .footer .wm { font-family: var(--serif); font-size: 1.6rem; color: var(--ink); }
+  .footer .wm em { color: var(--accent); }
+
+  ul.tight { margin: .3rem 0 .6rem; padding-left: 1.4rem; }
+  ul.tight li { margin: .25rem 0; }
+  .callout { border-left: .45rem solid var(--accent); padding: .3rem 0 .3rem 1.2rem; margin: 1.1rem 0; font-weight: 500; }
+
+  /* SVG 内の文字。図の viewBox は「10 単位 ≒ 1rem」になるよう、置く場所の幅に合わせてある */
+  svg text { font-family: var(--sans); fill: var(--ink); }
+  svg .lbl { font-size: 11px; fill: var(--ink-2); }
+  svg .lbl-s { font-size: 9.5px; fill: var(--muted); }
+  svg .val { font-size: 10px; font-family: var(--mono); fill: var(--ink-2); }
+  svg .digit { font-family: var(--mono); font-size: 20px; font-weight: 500; text-anchor: middle; dominant-baseline: central; }
+  svg .axis { stroke: var(--ink); stroke-width: 1; }
+  svg .grid { stroke: var(--line); stroke-width: .7; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- 1 枚目: ゲームと強化学習の考え方                                 -->
+<!-- ============================================================ -->
+<div class="sheet" id="sheet1">
+  <header class="masthead">
+    <svg class="symbol" viewBox="0 0 200 200" aria-hidden="true">
+      <rect width="200" height="200" rx="44" fill="#4A6A94"/>
+      <circle cx="100" cy="100" r="56" fill="none" stroke="#FAF9F5" stroke-width="16"/>
+      <circle cx="112" cy="92" r="24" fill="#FAF9F5"/>
+    </svg>
+    <div>
+      <p class="kicker">強化学習 × 数当てゲーム</p>
+      <h1>AI は数当てゲームの「うまい予想」を<br>どうやって覚えるのか ― <span class="wordmark">hit <em>&amp;</em> blow</span></h1>
+      <p class="lede">数当てゲーム <b>Hit &amp; Blow</b> の CPU を、<b>強化学習</b>(深層 Q 学習 / DQN)で作りました。
+        CPU には「どう予想すればよいか」を教えていません。数万回の対局で、
+        <b>早く当てるほど高い点数(報酬)がもらえる</b>というルールだけから、戦略を自分で身につけます。</p>
+    </div>
+    <div class="sheetno">1<small>/ 2</small></div>
+  </header>
+
+  <div class="topics">
+    <!-- 上段 -->
+    <section class="card">
+      <h2><span class="no">01</span>Hit &amp; Blow のルール</h2>
+      <p>相手が決めた <b>0〜9 の重複しない 4 つの数字</b>を当てるゲームです。予想を言うたびに、次の 2 種類のヒントが返ってきます。</p>
+      <div class="two small">
+        <div class="box"><h4><svg class="pip" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" fill="var(--accent)"/></svg> Hit</h4>数字も<b>位置も</b>合っている個数</div>
+        <div class="box"><h4><svg class="pip" viewBox="0 0 20 20"><circle cx="10" cy="10" r="6" fill="none" stroke="var(--ink)" stroke-width="2.5"/></svg> Blow</h4>数字は合っているが<b>位置が違う</b>個数</div>
+      </div>
+      <figure>
+        <svg id="fig-rules" viewBox="0 0 390 178" role="img" aria-label="秘密の数字 7683 に対して、0123 は 1 Hit 0 Blow、3670 は 1 Hit 2 Blow になる例"></svg>
+        <figcaption>例: 秘密の数字が <b>7683</b> のとき。展示中のアプリでは、プレイヤーと CPU が<b>同じ秘密の数字</b>を交互に予想し、<b>少ない回数で当てた方の勝ち</b>です。</figcaption>
+      </figure>
+      <p>数字の組み合わせは全部で <span class="num">10×9×8×7 = 5,040</span> 通り。慣れた人でも平均 5〜6 回ほどかかります。</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="no">02</span>候補を絞り込むゲーム</h2>
+      <p>ここまでの判定と<b>矛盾しない秘密の数字</b>をすべて集めたものを<span class="keyword">候補集合</span>と呼びます。
+        最初は 5,040 個。予想すると、返ってくる判定(14 種類)ごとに候補がグループに分かれ、そのうち 1 グループだけが残ります。</p>
+      <figure>
+        <svg id="fig-buckets" viewBox="0 0 390 262" role="img" aria-label="最初に 0123 と予想したときの、判定ごとの残り候補数"></svg>
+        <figcaption>最初に <b>0123</b> と予想したときの、判定ごとの残り候補数。秘密が 7683 なら判定は 1 Hit 0 Blow で、<b>480 個</b>に絞られる。</figcaption>
+      </figure>
+      <div class="callout">良い予想とは、<b>どの判定が返ってきても残りの候補が少なくなる</b>予想。候補を「なるべく均等に、細かく」分ける予想です。</div>
+      <p class="small">ただし本当に最善の予想を求めるには、何手も先まで全パターンを調べる必要があり、とても大変です。そこで今回は、AI に<b>経験から</b>学ばせました。</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="no">03</span>強化学習とは?</h2>
+      <p><span class="keyword">強化学習</span>は、<b>試行錯誤</b>を通じて「どう行動すれば、もらえる報酬の合計が最大になるか」を学ぶ機械学習の方法です。
+        囲碁の AlphaGo、ロボットの歩行制御、ゲーム AI などに使われています。</p>
+      <figure>
+        <svg id="fig-loop" viewBox="0 0 390 236" role="img" aria-label="エージェントが環境に行動を送り、環境が状態と報酬を返すループ"></svg>
+        <figcaption>強化学習の基本ループ。エージェントは<b>状態</b>を見て<b>行動</b>を選び、環境から<b>報酬</b>と次の状態を受け取る。今回は 状態 = 候補集合と手数、行動 = 次の予想(5,040 通り)、報酬 = 予想 1 回ごとの点数。</figcaption>
+      </figure>
+      <table class="small">
+        <thead><tr><th></th><th>教師あり学習</th><th>強化学習(今回)</th></tr></thead>
+        <tbody>
+          <tr><th>教えるもの</th><td>問題と<b>正解</b>のペア<br><span class="muted">例: 写真と「ねこ」</span></td><td>行動の結果の<b>よしあし(報酬)</b>だけ。正解の手は教えない</td></tr>
+          <tr><th>難しさ</th><td>正解データを大量に用意する必要がある</td><td>報酬が<b>遅れて</b>届く。どの手が良かったかを自分で見つける</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 下段 -->
+    <section class="card">
+      <h2><span class="no">04</span>報酬の設計</h2>
+      <p>AI は「報酬の合計」を大きくしようとします。そこで、<b>早く当てるほど合計が高くなる</b>ように点数を決めました。</p>
+      <ul class="tight">
+        <li>予想するたびに <span class="num">−1</span> 点</li>
+        <li><span class="num">n</span> 回目で当てたら <span class="num">11 − n</span> 点のボーナス</li>
+        <li>10 回で当てられなければ <span class="num">−5</span> 点</li>
+      </ul>
+      <figure>
+        <svg id="fig-reward" viewBox="0 0 390 196" role="img" aria-label="当てた回数ごとの報酬の合計"></svg>
+        <figcaption>当てた回数 <i>n</i> ごとの報酬の合計(<span class="num">11 − 2n</span>)。1 回目なら +9、5 回目なら +1、当てられなければ −15。</figcaption>
+      </figure>
+      <p class="small">報酬の決め方ひとつで AI の目標が変わります。もし「当てたら +1」だけにすると、何回かかっても同じ点数なので、早く当てようとしなくなってしまいます。</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="no">05</span>Q 値 ― 手の将来の価値</h2>
+      <p>状態 <i>s</i> で予想 <i>a</i> をしたあと、<b>ゲームが終わるまでにもらえる報酬の合計の見込み</b>を <span class="keyword">Q 値</span> <i>Q</i>(<i>s</i>,&nbsp;<i>a</i>) と呼びます。
+        Q 値が正しくわかれば、<b>Q 値が最大の予想を選ぶ</b>だけで最善の戦略になります。</p>
+      <div class="box accent">
+        <div class="eq"><i>Q</i>(<i>s</i>, <i>a</i>) <span class="op">=</span> <i>r</i> <span class="op">+</span> <i>γ</i> · max<sub><i>a′</i></sub> <i>Q</i>(<i>s′</i>, <i>a′</i>)</div>
+        <p class="small" style="text-align:center"><b>ベルマン方程式</b>:今の価値 = すぐもらえる報酬 + 次の状態 <i>s′</i> で最善を尽くしたときの価値(<i>γ</i> は将来の報酬の割引率。今回は 1)</p>
+      </div>
+      <h3>学習済み AI(Hard)が見積もった Q 値</h3>
+      <p class="small" style="margin-bottom:.3rem">1 回目 0123 → 1 Hit 0 Blow(残り 480 個)の場面で、2 回目の予想を比べると:</p>
+      <table class="small" id="tbl-q">
+        <thead><tr><th>予想</th><th>候補に<br>含まれる?</th><th class="r">最大の<br>グループ</th><th class="r">Q 値</th><th style="width:28%"></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="tiny muted" style="margin-top:.5rem">Q ≈ 1.7 は「合計 5 回前後で当てられそう」という見積もり(2 回目以降の報酬の合計は 12 − 2n なので n ≈ 5.1)。前の判定と矛盾する 0132 は候補を 2 グループにしか分けられず、Q 値が低い。</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="no">06</span>学習の流れ</h2>
+      <p>Q 値を表にして覚えようとしても、状態(候補集合)の種類が多すぎて表が作れません。そこで <b>Q 値を予測するニューラルネットワーク</b>を使います。これが
+        <span class="keyword">DQN(Deep Q-Network)</span>です。</p>
+      <figure>
+        <svg id="fig-flow" viewBox="0 0 390 292" role="img" aria-label="対局、経験の保存、目標値の計算、ネットワークの修正をくり返す学習の流れ"></svg>
+      </figure>
+      <p class="small">予測した Q 値がベルマン方程式を満たすように、ネットワークを少しずつ修正していきます。<b>くわしい仕組みと結果は 2 枚目へ →</b></p>
+    </section>
+  </div>
+
+  <footer class="footer">
+    <span class="wm">hit <em>&amp;</em> blow</span>
+    <span>chrom._. | Digitartテクノロジー愛好会</span>
+  </footer>
+</div>
+
+<!-- ============================================================ -->
+<!-- 2 枚目: DQN の仕組みと結果                                      -->
+<!-- ============================================================ -->
+<div class="sheet" id="sheet2">
+  <header class="masthead compact">
+    <svg class="symbol" viewBox="0 0 200 200" aria-hidden="true">
+      <rect width="200" height="200" rx="44" fill="#4A6A94"/>
+      <circle cx="100" cy="100" r="56" fill="none" stroke="#FAF9F5" stroke-width="16"/>
+      <circle cx="112" cy="92" r="24" fill="#FAF9F5"/>
+    </svg>
+    <div>
+      <p class="kicker">DQN の仕組みと結果</p>
+      <h1>ニューラルネットワークで<br>「手の価値」を予測する</h1>
+    </div>
+    <div class="qr">
+      <svg viewBox="-2 -2 33 33" aria-label="アプリの QR コード"><rect x="-2" y="-2" width="33" height="33" fill="#fff"/><path stroke="#141413" fill="none" d="M0 0.5h7m3 0h1m1 0h1m1 0h1m2 0h3m2 0h7m-29 1h1m5 0h1m1 0h1m1 0h2m1 0h1m3 0h1m1 0h1m2 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m4 0h2m2 0h1m4 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m3 0h2m1 0h1m4 0h1m3 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h2m1 0h1m2 0h1m2 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m2 0h1m2 0h1m1 0h2m1 0h4m1 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-20 1h1m5 0h1m1 0h1m2 0h1m-21 1h1m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1m4 0h5m3 0h1m2 0h1m-27 1h2m1 0h1m2 0h2m2 0h1m1 0h1m1 0h1m5 0h2m2 0h1m2 0h1m-28 1h2m3 0h2m1 0h2m1 0h1m1 0h1m5 0h1m1 0h1m3 0h3m-27 1h2m1 0h1m2 0h2m1 0h1m1 0h2m1 0h4m2 0h1m1 0h1m2 0h1m-27 1h1m2 0h3m1 0h1m1 0h1m1 0h1m1 0h4m3 0h2m2 0h1m1 0h2m-29 1h2m1 0h1m1 0h1m1 0h3m1 0h2m1 0h1m2 0h1m2 0h4m1 0h1m2 0h1m-29 1h2m2 0h1m1 0h1m1 0h2m1 0h1m1 0h1m4 0h1m1 0h1m2 0h1m1 0h1m1 0h2m-29 1h2m2 0h1m3 0h2m1 0h2m3 0h3m2 0h1m3 0h1m1 0h1m-28 1h1m2 0h4m1 0h2m1 0h1m5 0h1m1 0h5m1 0h1m1 0h2m-26 1h1m1 0h1m1 0h2m2 0h1m1 0h1m2 0h1m3 0h1m1 0h1m2 0h2m1 0h1m-29 1h1m5 0h1m1 0h2m2 0h1m1 0h1m2 0h1m2 0h1m1 0h2m3 0h2m-28 1h1m6 0h2m1 0h4m1 0h2m2 0h3m2 0h1m1 0h1m-28 1h1m3 0h1m1 0h1m1 0h1m1 0h3m1 0h4m1 0h6m-17 1h5m1 0h1m1 0h2m1 0h2m3 0h1m1 0h3m-29 1h7m3 0h4m2 0h1m2 0h2m1 0h1m1 0h2m1 0h2m-29 1h1m5 0h1m2 0h4m2 0h3m1 0h2m3 0h2m1 0h2m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m2 0h4m1 0h5m3 0h1m-29 1h1m1 0h3m1 0h1m3 0h4m2 0h1m7 0h1m1 0h3m-29 1h1m1 0h3m1 0h1m1 0h2m1 0h2m3 0h1m2 0h1m3 0h3m2 0h1m-29 1h1m5 0h1m2 0h4m1 0h1m2 0h4m1 0h1m1 0h1m2 0h1m-28 1h7m1 0h2m2 0h1m1 0h1m1 0h2m1 0h3m1 0h3m1 0h2"/></svg>
+      <div>
+        <p class="qr-title">AI と対戦してみよう</p>
+        <p class="tiny">スマートフォンのブラウザで遊べます<br><span class="mono">www.chrom.jp/hit-and-blow</span></p>
+      </div>
+    </div>
+    <div class="sheetno">2<small>/ 2</small></div>
+  </header>
+
+  <div class="topics">
+    <!-- 上段 -->
+    <section class="card">
+      <h2><span class="no">07</span>局面を数値で表す</h2>
+      <p>ニューラルネットワークに渡せるのは数値だけです。そこで、状態と予想をそれぞれ数値の並び(<span class="keyword">特徴量</span>)に変換します。</p>
+      <table class="small">
+        <thead><tr><th>種類</th><th>内容</th><th class="r">個数</th></tr></thead>
+        <tbody>
+          <tr><th rowspan="3">状態</th><td>残り候補数(対数で 0〜1 に)</td><td class="r num">1</td></tr>
+          <tr><td>何手目か / 残り 1 個か</td><td class="r num">2</td></tr>
+          <tr><td>候補の中で、各桁に各数字が出てくる割合(4 桁 × 10)</td><td class="r num">40</td></tr>
+          <tr><th rowspan="4">予想<br>ごと</th><td>候補に含まれるか / 一発で当たる確率</td><td class="r num">2</td></tr>
+          <tr><td>残る候補数の期待値 / 最大グループの割合</td><td class="r num">2</td></tr>
+          <tr><td>判定の分かれ方のエントロピー(情報量)/ 判定の種類数</td><td class="r num">2</td></tr>
+          <tr><td>各桁の数字の出やすさ / 残り候補数の対数の期待値</td><td class="r num">2</td></tr>
+        </tbody>
+      </table>
+      <p class="small" style="margin-top:.8rem">「候補をどれだけ細かく分けるか」を表す量は渡していますが、<b>どれをどう重視すればよいか</b>は教えていません。それを見つけるのが学習の仕事です。</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="no">08</span>ネットワークの構造</h2>
+      <figure style="margin-top:.2rem">
+        <svg id="fig-net" viewBox="0 0 390 236" role="img" aria-label="入力 51、隠れ層 64、64、出力 1 の全結合ネットワーク"></svg>
+        <figcaption>状態 43 + 予想 8 = <b>51 個の数値</b>を入れると <b>Q 値を 1 つ</b>出す全結合ネットワーク(活性化関数 ReLU)。<b>5,040 通りの予想すべて</b>に同じネットワークを使い、Q 値が最大の予想を選ぶ。</figcaption>
+      </figure>
+      <table class="small">
+        <thead><tr><th></th><th>A: 出力 5,040 個</th><th>B: 出力 1 個(採用)</th></tr></thead>
+        <tbody>
+          <tr><th>重みの数</th><td class="num">約 336,000</td><td class="num"><b>7,553</b></td></tr>
+          <tr><th>学び方</th><td>5,040 個の値をばらばらに覚える</td><td>「よく分ける予想」という<b>性質</b>で覚えるので、他の予想にも応用が効く</td></tr>
+        </tbody>
+      </table>
+      <p class="tiny muted" style="margin-top:.5rem">重み(約 30 KB)はアプリに同梱し、ブラウザ上で計算しています。</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="no">09</span>DQN の 4 つの工夫</h2>
+      <p class="small">自分の予測を使って自分を修正するため、Q 値が暴れて学習が崩れやすいことが知られています。DQN では次の工夫を組み合わせます。</p>
+      <div class="tech">
+        <svg id="fig-replay" viewBox="0 0 130 92"></svg>
+        <div><h3>① 経験再生</h3><p class="small">対局の経験(状態・予想・報酬・次の状態)を最大 <span class="num">50,000</span> 件ためておき、<b>ランダムに 64 件</b>ずつ取り出して学習する。続けて起きた似た経験ばかりで偏って学ばないようにする。</p></div>
+      </div>
+      <div class="tech">
+        <svg id="fig-target" viewBox="0 0 130 92"></svg>
+        <div><h3>② ターゲットネットワーク</h3><p class="small">ベルマン方程式の右辺(目標値)は、<b>少し前のネットワークのコピー</b>で計算する。コピーは <span class="num">1,000</span> 回の更新ごとに作り直す。目標が動き続けて「追いかけっこ」になるのを防ぐ。</p></div>
+      </div>
+      <div class="tech">
+        <svg id="fig-eps" viewBox="0 0 130 92"></svg>
+        <div><h3>③ ε-greedy(探索と活用)</h3><p class="small">確率 <i>ε</i> でランダムな予想を試し、それ以外は Q 値が最大の予想を選ぶ。<i>ε</i> は 1 から 0.05 まで徐々に下げ、最初は<b>いろいろ試し</b>、だんだん<b>学んだことを活かす</b>。</p></div>
+      </div>
+      <div class="tech">
+        <svg id="fig-double" viewBox="0 0 130 92"></svg>
+        <div><h3>④ Double DQN</h3><p class="small">次の状態での最善手を<b>選ぶ</b>のは学習中のネットワーク、その手を<b>評価する</b>のはターゲットと役割を分け、Q 値を高く見積もりすぎる偏りを減らす。</p></div>
+      </div>
+    </section>
+
+    <!-- 下段 -->
+    <section class="card">
+      <h2><span class="no">10</span>学習の進み方</h2>
+      <figure style="margin-top:.2rem">
+        <svg id="fig-curve" viewBox="0 0 390 262" role="img" aria-label="学習エピソード数と平均回数の関係。学習が進むと平均回数が減る"></svg>
+        <figcaption>学習の途中で保存したネットワークごとに、500 個の秘密の数字を当てさせたときの平均回数(当てられなければ 11 回と数える)。横軸は対数目盛。<b>下に行くほど強い。</b></figcaption>
+      </figure>
+      <p class="small">1 エピソード = 秘密の数字 1 つを当てるまでの 1 ゲーム。<span class="num">30,000</span> エピソード(ノートパソコンの CPU で約 15 分)学習しました。
+        序盤は経験が少なく Q 値の予測が不安定なため、グラフが大きく上下します。</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="no">11</span>3 つの難易度</h2>
+      <p class="small">学習<b>途中</b>のネットワークを、そのまま CPU の難易度にしています。下は同じ秘密 <b class="mono">7683</b> を 3 つの CPU に解かせた記録です(右の数字は残り候補数)。</p>
+      <table class="trace" id="trace"></table>
+      <ul class="tight small" style="margin-top:.9rem">
+        <li><b style="color:var(--easy)">Easy</b>(600 回目):<span class="tag bad">矛盾</span> 前の判定から<b>ありえない</b>予想をくり返し、候補を半分ずつしか減らせない。</li>
+        <li><b style="color:var(--normal)">Normal</b>(1,300 回目):矛盾しない予想はできるが、絞り込みはまだ下手。</li>
+        <li><b style="color:var(--hard)">Hard</b>(30,000 回目):<span class="tag good">候補外</span> 3・4 回目は当たる可能性のない予想だが、22 → 2 個と<b>大きく絞り込む</b>ために、あえて選んでいる。</li>
+      </ul>
+      <p class="small">「当てにいく」より「情報を集める」方が得な場面があることを、AI は誰にも教わらずに見つけました。</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="no">12</span>結果とまとめ</h2>
+      <figure style="margin-top:.2rem">
+        <svg id="fig-dist" viewBox="0 0 390 292" role="img" aria-label="難易度ごとの、当てるまでの回数の分布"></svg>
+        <figcaption>同じ 1,000 個の秘密の数字で計測。<br>ミニマックス法:最悪の場合の残り候補数が最小になる予想を計算で選ぶ。<br>基準プレイヤー:矛盾しない候補からランダムに選ぶ(上手な人の目安)。</figcaption>
+      </figure>
+      <h3>まとめ</h3>
+      <ul class="tight small" style="margin:0">
+      <li>報酬だけを手がかりに、AI は「矛盾しない予想をする」→「候補をよく分ける予想をする」と<b>段階的に</b>上達した。</li>
+      <li>Hard の平均は <b class="num">5.26 回</b>・最悪でも 7 回。このゲームで理論上の最善とされる平均<b class="num">約 5.21 回</b>にかなり近い。計算で作ったミニマックス法(平均 5.33 回)も、平均ではわずかに上回った。</li>
+      <li>候補外の予想で情報を集めるという、人間がなかなか思いつかない手も自分で見つけた。</li>
+      <li><b>今後の課題</b>:相手に合わせた強さの自動調整、桁数や重複ありなどのルール変更への対応。</li>
+    </ul>
+    </section>
+  </div>
+
+  <footer class="footer">
+    <span class="wm">hit <em>&amp;</em> blow</span>
+    <span>chrom._. | Digitartテクノロジー愛好会</span>
+  </footer>
+</div>
+
+<script>
+// ---------------------------------------------------------------
+// データ(training/results.json、学習済みの重みでの計算、チェックポイントの計測から)
+// ---------------------------------------------------------------
+const BUCKETS = [['0H0B',360],['0H1B',1440],['0H2B',1260],['0H3B',264],['0H4B',9],['1H0B',480],['1H1B',720],['1H2B',216],['1H3B',8],['2H0B',180],['2H1B',72],['2H2B',6],['3H0B',24],['4H0B',1]]
+// [予想, 候補に含まれるか, 最大のグループ, Hard の Q 値]
+const QROWS = [['0456',true,126,1.71],['4713',false,132,1.63],['4567',false,168,1.48],['0124',false,180,1.10],['0132',false,240,0.26]]
+// [予想, hit, blow, 残り候補, 'bad'(矛盾) | 'good'(候補外だが絞り込みに有効)]
+const TRACE = {
+  easy:   [['0123',1,0,480],['0132',0,1,240,'bad'],['0213',1,0,120,'bad'],['0124',0,0,60,'bad'],['5673',2,1,12],['5783',2,1,2],['5863',1,2,1],['7683',4,0,0]],
+  normal: [['0123',1,0,480],['0456',0,1,126],['4178',0,2,20],['7924',1,0,3],['7583',3,0,1],['7683',4,0,0]],
+  hard:   [['0123',1,0,480],['0456',0,1,126],['4713',1,1,22,'good'],['6378',0,4,2,'good'],['7683',4,0,0]],
+}
+const DIST = {
+  easy:     [0,1,13,20,74,154,244,236,166,81,11],
+  normal:   [0,3,29,97,249,334,180,62,24,18,4],
+  hard:     [0,0,16,112,488,360,24,0,0,0,0],
+  minimax:  [0,0,10,115,436,409,30,0,0,0,0],
+  baseline: [0,7,29,119,327,386,121,11,0,0,0],
+}
+const MEANS = { easy: 7.44, normal: 5.93, hard: 5.26, minimax: 5.33, baseline: 5.46 }
+// [エピソード, 平均回数](python evaluate.py --scan runs/main --games 500)
+const CURVE = [[50,6.316],[100,10.984],[150,10.888],[200,10.964],[250,10.542],[300,9.090],[350,10.852],[400,11.000],[450,10.898],[500,11.000],[550,7.462],[600,7.540],[650,6.926],[700,9.622],[750,8.322],[800,10.300],[850,9.202],[900,10.012],[950,9.364],[1000,9.600],[1050,9.216],[1100,9.126],[1150,8.270],[1200,7.166],[1250,7.098],[1300,5.948],[1350,6.920],[1400,5.552],[1450,5.634],[1500,5.624],[1550,5.490],[1600,5.662],[1650,5.426],[1700,5.518],[1750,5.406],[1800,5.380],[1850,5.352],[1900,5.346],[1950,5.356],[2000,5.350],[2050,5.354],[2100,5.334],[2150,5.354],[2200,5.380],[2250,5.394],[2300,5.376],[2350,5.366],[2400,5.366],[2450,5.352],[2500,5.338],[2550,5.344],[2600,5.364],[2650,5.364],[2700,5.338],[2750,5.336],[2800,5.306],[2850,5.304],[2900,5.296],[2950,5.330],[3000,5.316],[3500,5.306],[4000,5.330],[4500,5.326],[5000,5.326],[5500,5.300],[6000,5.304],[6500,5.298],[7000,5.284],[7500,5.282],[8000,5.308],[8500,5.306],[9000,5.306],[9500,5.252],[10000,5.302],[10500,5.298],[11000,5.280],[11500,5.270],[12000,5.284],[12500,5.274],[13000,5.278],[13500,5.282],[14000,5.286],[14500,5.280],[15000,5.280],[15500,5.278],[16000,5.288],[16500,5.270],[17000,5.260],[17500,5.260],[18000,5.272],[18500,5.262],[19000,5.272],[19500,5.272],[20000,5.258],[20500,5.270],[21000,5.244],[21500,5.234],[22000,5.234],[22500,5.264],[23000,5.218],[23500,5.270],[24000,5.284],[24500,5.272],[25000,5.290],[25500,5.270],[26000,5.272],[26500,5.288],[27000,5.280],[27500,5.276],[28000,5.266],[28500,5.280],[29000,5.286],[29500,5.296],[30000,5.294]]
+
+// ---------------------------------------------------------------
+const NS = 'http://www.w3.org/2000/svg'
+function el(parent, tag, attrs = {}, text) {
+  const e = document.createElementNS(NS, tag)
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v)
+  if (text != null) e.textContent = text
+  parent.appendChild(e)
+  return e
+}
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+const C = Object.fromEntries(['ink', 'ink-2', 'muted', 'line', 'surface', 'accent', 'accent-soft', 'easy', 'normal', 'hard', 'ref', 'pos', 'neg']
+  .map((k) => [k, css('--' + k)]))
+const fmt = (n) => n.toLocaleString('en-US')
+function arrowDefs(svg, id, color) {
+  const m = el(el(svg, 'defs'), 'marker', { id, viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto-start-reverse' })
+  el(m, 'path', { d: 'M0 0L10 5L0 10z', fill: color })
+}
+const hitPip = (g, x, y, r = 6.5) => el(g, 'circle', { cx: x, cy: y, r, fill: C.accent })
+const blowPip = (g, x, y, r = 5.6) => el(g, 'circle', { cx: x, cy: y, r, fill: 'none', stroke: C.ink, 'stroke-width': 2.2 })
+const pipHTML = (hit) => hit
+  ? `<svg class="pip" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" fill="${C.accent}"/></svg>`
+  : `<svg class="pip" viewBox="0 0 20 20"><circle cx="10" cy="10" r="6" fill="none" stroke="${C.ink}" stroke-width="2.5"/></svg>`
+
+// --- 01 ルールの図 ---
+;(function () {
+  const svg = document.getElementById('fig-rules')
+  const secret = '7683'
+  const rows = [
+    { label: '秘密の数字', sub: '相手には見えない', code: secret, secret: true },
+    { label: '予想 1', code: '0123' },
+    { label: '予想 2', code: '3670' },
+  ]
+  const x0 = 92, w = 36, gap = 6
+  rows.forEach((row, i) => {
+    const y = 6 + i * 58
+    el(svg, 'text', { x: 0, y: y + 21, class: 'lbl', 'font-weight': 700 }, row.label)
+    if (row.sub) el(svg, 'text', { x: 0, y: y + 36, class: 'lbl-s' }, row.sub)
+    let hit = 0, blow = 0
+    ;[...row.code].forEach((d, j) => {
+      const x = x0 + j * (w + gap)
+      let fill = '#fff', stroke = C.line, sw = 1.5, tc = C.ink
+      if (row.secret) { fill = C.surface; stroke = C.muted }
+      else if (secret[j] === d) { fill = C.accent; stroke = C.accent; tc = '#fff'; hit++ }
+      else if (secret.includes(d)) { stroke = C.ink; sw = 3; blow++ }
+      const r = el(svg, 'rect', { x, y, width: w, height: 44, rx: 7, fill, stroke, 'stroke-width': sw })
+      if (row.secret) r.setAttribute('stroke-dasharray', '4 3')
+      el(svg, 'text', { x: x + w / 2, y: y + 23, class: 'digit', fill: tc }, d)
+    })
+    if (!row.secret) {
+      const mx = x0 + 4 * (w + gap) + 12
+      for (let k = 0; k < hit; k++) hitPip(svg, mx + 7 + k * 16, y + 22)
+      for (let k = 0; k < blow; k++) blowPip(svg, mx + 7 + (hit + k) * 16, y + 22)
+      el(svg, 'text', { x: mx + 3 * 16 + 4, y: y + 26, class: 'lbl', 'font-weight': 700 }, `${hit} Hit ${blow} Blow`)
+    }
+  })
+})()
+
+// --- 02 判定ごとの候補数 ---
+;(function () {
+  const svg = document.getElementById('fig-buckets')
+  const left = 42, right = 330, top = 4, rowH = 18, max = 1440
+  BUCKETS.forEach(([name, n], i) => {
+    const y = top + i * rowH
+    const w = Math.max(1.5, (n / max) * (right - left))
+    const on = name === '1H0B'
+    const weight = on ? 700 : 400
+    el(svg, 'text', { x: left - 6, y: y + 12, class: 'val', 'text-anchor': 'end', 'font-weight': weight }, name)
+    el(svg, 'rect', { x: left, y: y + 2.5, width: w, height: rowH - 5, rx: 3, fill: on ? C.accent : '#c9cfd8' })
+    el(svg, 'text', { x: left + w + 5, y: y + 12, class: 'val', 'font-weight': weight }, fmt(n) + (on ? '  ← 7683 のとき' : ''))
+  })
+  el(svg, 'line', { x1: left, x2: left, y1: top, y2: top + rowH * BUCKETS.length, class: 'axis' })
+})()
+
+// --- 03 強化学習のループ ---
+;(function () {
+  const svg = document.getElementById('fig-loop')
+  arrowDefs(svg, 'ar-loop', C.ink)
+  const bw = 132, bh = 104, by = 66
+  // エージェント
+  el(svg, 'rect', { x: 0, y: by, width: bw, height: bh, rx: 14, fill: C['accent-soft'], stroke: C.accent, 'stroke-width': 2 })
+  el(svg, 'text', { x: bw / 2, y: by + 30, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 700 }, 'エージェント')
+  el(svg, 'text', { x: bw / 2, y: by + 47, 'text-anchor': 'middle', class: 'lbl-s' }, '(CPU の AI)')
+  const nx = [bw / 2 - 26, bw / 2, bw / 2 + 26], ny = [[by + 70, by + 86], [by + 64, by + 78, by + 92], [by + 78]]
+  ny.forEach((col, i) => col.forEach((y) => {
+    if (i < 2) ny[i + 1].forEach((y2) => el(svg, 'line', { x1: nx[i], y1: y, x2: nx[i + 1], y2, stroke: C.accent, 'stroke-width': .7, opacity: .6 }))
+  }))
+  ny.forEach((col, i) => col.forEach((y) => el(svg, 'circle', { cx: nx[i], cy: y, r: 4, fill: C.accent })))
+  // 環境
+  const ex = 390 - bw
+  el(svg, 'rect', { x: ex, y: by, width: bw, height: bh, rx: 14, fill: C.surface, stroke: C.ink, 'stroke-width': 2 })
+  el(svg, 'text', { x: ex + bw / 2, y: by + 30, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 700 }, '環境')
+  el(svg, 'text', { x: ex + bw / 2, y: by + 47, 'text-anchor': 'middle', class: 'lbl-s' }, '(Hit & Blow)')
+  for (let j = 0; j < 4; j++) {
+    el(svg, 'rect', { x: ex + 26 + j * 21, y: by + 64, width: 17, height: 24, rx: 3, fill: '#fff', stroke: C.muted, 'stroke-dasharray': '3 2' })
+    el(svg, 'text', { x: ex + 34.5 + j * 21, y: by + 76.5, class: 'digit', 'font-size': 12, fill: C.muted }, '?')
+  }
+  // 行動(上)
+  el(svg, 'path', { d: `M${bw / 2} ${by - 4} C${bw / 2} 16 ${ex + bw / 2} 16 ${ex + bw / 2} ${by - 2}`, fill: 'none', stroke: C.ink, 'stroke-width': 2.2, 'marker-end': 'url(#ar-loop)' })
+  el(svg, 'text', { x: 195, y: 14, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700 }, '行動 a:次の予想')
+  el(svg, 'text', { x: 195, y: 44, 'text-anchor': 'middle', class: 'lbl' }, '例「0456」')
+  // 状態・報酬(下)
+  const yb = by + bh
+  el(svg, 'path', { d: `M${ex + bw / 2} ${yb + 4} C${ex + bw / 2} 226 ${bw / 2} 226 ${bw / 2} ${yb + 2}`, fill: 'none', stroke: C.ink, 'stroke-width': 2.2, 'marker-end': 'url(#ar-loop)' })
+  el(svg, 'text', { x: 195, y: yb + 22, 'text-anchor': 'middle', class: 'lbl' }, '例「0 Hit 1 Blow → 残り 126 個」「−1 点」')
+  el(svg, 'text', { x: 195, y: 234, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700 }, '次の状態 s′ と 報酬 r')
+  el(svg, 'text', { x: 195, y: by + 48, 'text-anchor': 'middle', class: 'lbl-s' }, 'これを何万回も')
+  el(svg, 'text', { x: 195, y: by + 62, 'text-anchor': 'middle', class: 'lbl-s' }, 'くり返して学ぶ')
+})()
+
+// --- 04 報酬 ---
+;(function () {
+  const svg = document.getElementById('fig-reward')
+  const vals = [...Array(10)].map((_, i) => 11 - 2 * (i + 1)).concat([-15])
+  const labels = [...Array(10)].map((_, i) => String(i + 1)).concat(['未達'])
+  const left = 28, right = 390, top = 12, bottom = 162
+  const y = (v) => top + (10 - v) / 28 * (bottom - top)
+  const bw = (right - left) / vals.length
+  ;[10, 5, 0, -5, -10, -15].forEach((v) => {
+    el(svg, 'line', { x1: left, x2: right, y1: y(v), y2: y(v), class: v === 0 ? 'axis' : 'grid' })
+    el(svg, 'text', { x: left - 5, y: y(v) + 3.5, class: 'val', 'text-anchor': 'end' }, v > 0 ? '+' + v : v)
+  })
+  vals.forEach((v, i) => {
+    const x = left + i * bw + 3.5, w = bw - 7
+    const y0 = y(Math.max(v, 0)), h = Math.abs(y(v) - y(0))
+    el(svg, 'rect', { x, y: y0, width: w, height: Math.max(h, 1), rx: 3, fill: v >= 0 ? C.pos : C.neg })
+    el(svg, 'text', { x: x + w / 2, y: v >= 0 ? y0 - 4 : y(v) + 12, class: 'val', 'text-anchor': 'middle' }, v > 0 ? '+' + v : v)
+    el(svg, 'text', { x: x + w / 2, y: bottom + 16, class: 'lbl', 'text-anchor': 'middle' }, labels[i])
+  })
+  el(svg, 'text', { x: (left + right) / 2, y: bottom + 32, class: 'lbl-s', 'text-anchor': 'middle' }, '当てた回数 n')
+})()
+
+// --- 05 Q 値の表 ---
+;(function () {
+  const tb = document.querySelector('#tbl-q tbody')
+  QROWS.forEach(([g, inC, big, q], i) => {
+    const tr = document.createElement('tr')
+    const pct = Math.max(0, q) / 1.8 * 100
+    tr.innerHTML = `<td class="num" style="font-size:1.2rem;white-space:nowrap">${g}${i === 0 ? ' <span class="tag good">選んだ手</span>' : ''}</td>
+      <td style="white-space:nowrap">${inC ? '○' : '×'}${g === '0132' ? ' <span class="tag bad">矛盾</span>' : ''}</td>
+      <td class="r num">${big}</td><td class="r num"><b>${q.toFixed(2)}</b></td>
+      <td style="vertical-align:middle"><div style="height:.8rem;border-radius:.2rem;background:${i === 0 ? C.accent : '#c9cfd8'};width:${pct}%"></div></td>`
+    tb.appendChild(tr)
+  })
+})()
+
+// --- 06 学習の流れ(縦) ---
+;(function () {
+  const svg = document.getElementById('fig-flow')
+  arrowDefs(svg, 'ar-flow', C.accent)
+  const steps = [
+    ['① 対局する', 'Q 値が最大の予想を選ぶ(ときどきランダム)'],
+    ['② 経験をためる', '状態・予想・報酬・次の状態を記録'],
+    ['③ 目標値を計算する', 'r + max Q(s′, a′) … ベルマン方程式の右辺'],
+    ['④ ネットワークを修正', '予測した Q 値と目標値の差が小さくなるように'],
+  ]
+  const x = 0, w = 330, h = 56, gap = 18
+  steps.forEach(([t, d], i) => {
+    const y = 4 + i * (h + gap)
+    el(svg, 'rect', { x, y, width: w, height: h, rx: 12, fill: i === 3 ? C['accent-soft'] : C.surface, stroke: i === 3 ? C.accent : 'none', 'stroke-width': 1.5 })
+    el(svg, 'text', { x: x + 16, y: y + 23, 'font-size': 13.5, 'font-weight': 700 }, t)
+    el(svg, 'text', { x: x + 16, y: y + 43, class: 'lbl' }, d)
+    if (i < 3) el(svg, 'line', { x1: x + 40, x2: x + 40, y1: y + h + 2, y2: y + h + gap - 3, stroke: C.accent, 'stroke-width': 2.2, 'marker-end': 'url(#ar-flow)' })
+  })
+  // ④ → ① に戻る
+  const yTop = 4 + h / 2, yBot = 4 + 3 * (h + gap) + h / 2
+  el(svg, 'path', { d: `M${w + 2} ${yBot} H${w + 30} V${yTop} H${w + 6}`, fill: 'none', stroke: C.accent, 'stroke-width': 2, 'stroke-dasharray': '5 4', 'marker-end': 'url(#ar-flow)' })
+  el(svg, 'text', { x: w + 46, y: (yTop + yBot) / 2, 'text-anchor': 'middle', class: 'lbl-s', transform: `rotate(90 ${w + 46} ${(yTop + yBot) / 2})` }, 'くり返す(30,000 ゲーム)')
+})()
+
+// --- 08 ネットワーク ---
+;(function () {
+  const svg = document.getElementById('fig-net')
+  const layers = [
+    { x: 74, n: 9, label: '入力', size: '51' },
+    { x: 176, n: 8, label: '隠れ層 1', size: '64' },
+    { x: 278, n: 8, label: '隠れ層 2', size: '64' },
+    { x: 362, n: 1, label: '出力', size: 'Q 値' },
+  ]
+  const top = 28, bottom = 186
+  const pos = layers.map((L) => [...Array(L.n)].map((_, i) => L.n === 1 ? (top + bottom) / 2 : top + i * (bottom - top) / (L.n - 1)))
+  const gapNode = (l, i) => l > 0 && l < 3 && i === 4   // 「⋮」を置く位置
+  for (let l = 0; l < layers.length - 1; l++)
+    pos[l].forEach((y1, i) => pos[l + 1].forEach((y2, j) => {
+      if (gapNode(l, i) || gapNode(l + 1, j)) return
+      el(svg, 'line', { x1: layers[l].x, y1, x2: layers[l + 1].x, y2, stroke: C.accent, 'stroke-width': .5, opacity: .35 })
+    }))
+  layers.forEach((L, l) => {
+    pos[l].forEach((y, i) => {
+      if (gapNode(l, i)) { el(svg, 'text', { x: L.x, y: y + 4, 'text-anchor': 'middle', class: 'lbl' }, '⋮'); return }
+      const fill = l === 0 ? (i < 6 ? '#fff' : C['accent-soft']) : l === 3 ? C.accent : '#fff'
+      el(svg, 'circle', { cx: L.x, cy: y, r: l === 3 ? 9 : 6, fill, stroke: l === 3 ? C.accent : C.ink, 'stroke-width': 1.3 })
+    })
+    el(svg, 'text', { x: L.x, y: 12, 'text-anchor': 'middle', class: 'lbl', 'font-weight': 700 }, L.label)
+    el(svg, 'text', { x: L.x, y: bottom + 22, 'text-anchor': 'middle', class: 'val' }, L.size)
+  })
+  const brace = (a, b, label, n) => {
+    el(svg, 'path', { d: `M60 ${a - 4} h-6 V${b + 4} h6`, fill: 'none', stroke: C['ink-2'], 'stroke-width': 1 })
+    el(svg, 'text', { x: 48, y: (a + b) / 2 - 2, 'text-anchor': 'end', class: 'lbl' }, label)
+    el(svg, 'text', { x: 48, y: (a + b) / 2 + 12, 'text-anchor': 'end', class: 'val' }, n)
+  }
+  brace(pos[0][0], pos[0][5], '状態', '43')
+  brace(pos[0][6], pos[0][8], '予想', '8')
+  el(svg, 'text', { x: 195, y: bottom + 44, 'text-anchor': 'middle', class: 'lbl-s' }, '線の 1 本 1 本が「重み」。学習で調整される数値は全部で 7,553 個')
+})()
+
+// --- 09 工夫のアイコン(各 130 × 92) ---
+;(function () {
+  // ① 経験再生
+  let svg = document.getElementById('fig-replay')
+  arrowDefs(svg, 'ar-r', C.accent)
+  el(svg, 'rect', { x: 0, y: 4, width: 80, height: 84, rx: 8, fill: C.surface })
+  el(svg, 'text', { x: 40, y: 18, 'text-anchor': 'middle', class: 'lbl-s' }, 'ためた経験')
+  const pick = new Set([2, 7, 9])
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) {
+    const i = r * 3 + c
+    el(svg, 'rect', { x: 8 + c * 22, y: 26 + r * 15, width: 18, height: 11, rx: 2, fill: pick.has(i) ? C.accent : '#fff', stroke: C.line })
+  }
+  el(svg, 'line', { x1: 84, x2: 102, y1: 46, y2: 46, stroke: C.accent, 'stroke-width': 2, 'marker-end': 'url(#ar-r)' })
+  ;[0, 1, 2].forEach((k) => el(svg, 'rect', { x: 106, y: 26 + k * 15, width: 22, height: 11, rx: 2, fill: C.accent }))
+  el(svg, 'text', { x: 130, y: 86, 'text-anchor': 'end', class: 'lbl-s' }, 'ランダム')
+
+  // ② ターゲットネットワーク
+  svg = document.getElementById('fig-target')
+  arrowDefs(svg, 'ar-t', C.accent)
+  const net = (x, label, fill) => {
+    el(svg, 'rect', { x, y: 14, width: 50, height: 50, rx: 9, fill, stroke: C.accent, 'stroke-width': 1.5 })
+    ;[[x + 13, 28], [x + 13, 50], [x + 25, 39], [x + 37, 28], [x + 37, 50]].forEach(([cx, cy]) => el(svg, 'circle', { cx, cy, r: 3.6, fill: C.accent }))
+    el(svg, 'text', { x: x + 25, y: 80, 'text-anchor': 'middle', class: 'lbl-s' }, label)
+  }
+  net(0, '学習中', C['accent-soft'])
+  net(80, 'コピー', '#fff')
+  el(svg, 'line', { x1: 54, x2: 76, y1: 39, y2: 39, stroke: C.accent, 'stroke-width': 2, 'stroke-dasharray': '4 3', 'marker-end': 'url(#ar-t)' })
+
+  // ③ ε の推移
+  svg = document.getElementById('fig-eps')
+  const L = 14, R = 128, T = 10, B = 66
+  const ex = (ep) => L + ep / 14000 * (R - L)
+  const ey = (e) => B - e * (B - T)
+  ;[0, 1].forEach((v) => {
+    el(svg, 'line', { x1: L, x2: R, y1: ey(v), y2: ey(v), class: v ? 'grid' : 'axis' })
+    el(svg, 'text', { x: L - 4, y: ey(v) + 3.5, 'text-anchor': 'end', class: 'val' }, v)
+  })
+  el(svg, 'polyline', { points: `${ex(0)},${ey(1)} ${ex(300)},${ey(1)} ${ex(10300)},${ey(0.05)} ${ex(14000)},${ey(0.05)}`, fill: 'none', stroke: C.accent, 'stroke-width': 2.5, 'stroke-linejoin': 'round' })
+  el(svg, 'text', { x: ex(5300) + 6, y: ey(0.5) - 4, 'font-size': 12, 'font-style': 'italic' }, 'ε')
+  el(svg, 'text', { x: L, y: B + 14, class: 'lbl-s' }, '0')
+  el(svg, 'text', { x: ex(10000), y: B + 14, 'text-anchor': 'middle', class: 'lbl-s' }, '1 万')
+  el(svg, 'text', { x: R, y: B + 26, 'text-anchor': 'end', class: 'lbl-s' }, 'エピソード')
+
+  // ④ Double DQN
+  svg = document.getElementById('fig-double')
+  arrowDefs(svg, 'ar-d', C['ink-2'])
+  el(svg, 'rect', { x: 0, y: 10, width: 56, height: 30, rx: 8, fill: C['accent-soft'], stroke: C.accent })
+  el(svg, 'text', { x: 28, y: 29, 'text-anchor': 'middle', class: 'lbl-s', fill: C.ink }, '学習中')
+  el(svg, 'rect', { x: 0, y: 52, width: 56, height: 30, rx: 8, fill: '#fff', stroke: C.accent })
+  el(svg, 'text', { x: 28, y: 71, 'text-anchor': 'middle', class: 'lbl-s', fill: C.ink }, 'コピー')
+  el(svg, 'line', { x1: 60, x2: 78, y1: 25, y2: 25, stroke: C['ink-2'], 'stroke-width': 1.5, 'marker-end': 'url(#ar-d)' })
+  el(svg, 'line', { x1: 60, x2: 78, y1: 67, y2: 67, stroke: C['ink-2'], 'stroke-width': 1.5, 'marker-end': 'url(#ar-d)' })
+  el(svg, 'text', { x: 82, y: 29, class: 'lbl', 'font-weight': 700 }, '選ぶ')
+  el(svg, 'text', { x: 82, y: 71, class: 'lbl', 'font-weight': 700 }, '評価')
+})()
+
+// --- 10 学習曲線 ---
+;(function () {
+  const svg = document.getElementById('fig-curve')
+  const L = 30, R = 384, T = 30, B = 218
+  const xmin = Math.log10(40), xmax = Math.log10(36000)
+  const x = (ep) => L + (Math.log10(ep) - xmin) / (xmax - xmin) * (R - L)
+  const y = (t) => B - (t - 4.8) / (11.3 - 4.8) * (B - T)   // 回数が少ないほど下
+  el(svg, 'text', { x: 0, y: 10, class: 'lbl-s' }, '平均回数(11 = 当てられない)')
+  el(svg, 'rect', { x: L, y: T, width: x(600) - L, height: B - T, fill: C.surface })
+  el(svg, 'text', { x: (L + x(600)) / 2, y: T - 5, 'text-anchor': 'middle', class: 'lbl-s', 'font-size': 8.5 }, '学習率 3×10⁻⁴')
+  el(svg, 'text', { x: x(600) + 4, y: T - 5, class: 'lbl-s', 'font-size': 8.5 }, '→ 600 回目から学習率を 1/10 に')
+  ;[5, 6, 7, 8, 9, 10, 11].forEach((t) => {
+    el(svg, 'line', { x1: L, x2: R, y1: y(t), y2: y(t), class: 'grid' })
+    el(svg, 'text', { x: L - 5, y: y(t) + 3.5, 'text-anchor': 'end', class: 'val' }, t)
+  })
+  ;[100, 300, 1000, 3000, 10000, 30000].forEach((ep) => {
+    el(svg, 'line', { x1: x(ep), x2: x(ep), y1: B, y2: B + 4, class: 'axis' })
+    el(svg, 'text', { x: x(ep), y: B + 15, 'text-anchor': 'middle', class: 'val' }, fmt(ep))
+  })
+  el(svg, 'line', { x1: L, x2: R, y1: B, y2: B, class: 'axis' })
+  el(svg, 'text', { x: (L + R) / 2, y: B + 32, 'text-anchor': 'middle', class: 'lbl' }, '学習したエピソード数(ゲーム数)')
+  // 基準線
+  el(svg, 'line', { x1: L, x2: R, y1: y(5.46), y2: y(5.46), stroke: C.ref, 'stroke-width': 1.2, 'stroke-dasharray': '6 4' })
+  el(svg, 'text', { x: L + 4, y: y(5.46) - 4, class: 'lbl-s', 'font-size': 8.5 }, '基準プレイヤー 5.46')
+  el(svg, 'line', { x1: L, x2: R, y1: y(5.21), y2: y(5.21), stroke: C.ref, 'stroke-width': 1.2, 'stroke-dasharray': '2 3' })
+  el(svg, 'text', { x: L + 4, y: y(5.21) + 11, class: 'lbl-s', 'font-size': 8.5 }, '理論上の最善 約 5.21')
+  if (!CURVE.length) return
+  el(svg, 'polyline', { points: CURVE.map(([e, t]) => `${x(e)},${y(t)}`).join(' '), fill: 'none', stroke: C['ink-2'], 'stroke-width': 1.4, 'stroke-linejoin': 'round' })
+  CURVE.forEach(([e, t]) => el(svg, 'circle', { cx: x(e), cy: y(t), r: 1.6, fill: C['ink-2'] }))
+  // 難易度に使ったチェックポイント。ラベルは右上の空いている所に置き、引き出し線でつなぐ
+  const marks = [[600, 'easy', 'Easy', 2600, 9.3], [1300, 'normal', 'Normal', 5200, 8.1], [30000, 'hard', 'Hard', 30000, 6.9]]
+  marks.forEach(([ep, key, label, lx, ly]) => {
+    const p = CURVE.find(([e]) => e === ep)
+    if (!p) return
+    const cx = x(ep), cy = y(p[1]), tx = x(lx), ty = y(ly)
+    const anchor = key === 'hard' ? 'end' : 'start'
+    el(svg, 'line', { x1: cx, y1: cy, x2: key === 'hard' ? cx : tx - 3, y2: ty + 4, stroke: C[key], 'stroke-width': 1 })
+    el(svg, 'circle', { cx, cy, r: 6, fill: C[key], stroke: '#fff', 'stroke-width': 2 })
+    el(svg, 'text', { x: key === 'hard' ? tx : tx, y: ty, 'text-anchor': anchor, 'font-size': 12, 'font-weight': 700, fill: C[key] }, label)
+    el(svg, 'text', { x: tx, y: ty + 12, 'text-anchor': anchor, class: 'val', 'font-size': 9 }, `${fmt(ep)} 回目・${p[1].toFixed(2)} 回`)
+  })
+})()
+
+// --- 11 対局の再現 ---
+;(function () {
+  const table = document.getElementById('trace')
+  const cols = [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard']]
+  const n = Math.max(...cols.map(([k]) => TRACE[k].length))
+  let html = `<thead><tr><th></th>${cols.map(([k, l]) => `<th style="color:${C[k]}">${l}</th>`).join('')}</tr></thead><tbody>`
+  for (let i = 0; i < n; i++) {
+    html += `<tr><td class="t">${i + 1}</td>`
+    cols.forEach(([k]) => {
+      const row = TRACE[k][i]
+      if (!row) { html += '<td></td>'; return }
+      const [g, h, b, left, tag] = row
+      const win = h === 4
+      const marks = win ? '<span class="small" style="color:var(--accent);font-weight:700">正解</span>'
+        : (h + b === 0 ? '<span class="muted">—</span>' : pipHTML(1).repeat(h) + pipHTML(0).repeat(b))
+      html += `<td class="${tag ?? ''} ${win ? 'win' : ''}"><div class="cell"><span class="g">${g}</span><span class="fb">${marks}</span><span class="left">${win ? '' : fmt(left)}</span></div></td>`
+    })
+    html += '</tr>'
+  }
+  html += `</tbody><tfoot><tr><td></td>${cols.map(([k]) => `<td style="color:${C[k]}">${TRACE[k].length} 回</td>`).join('')}</tr></tfoot>`
+  table.innerHTML = html
+})()
+
+// --- 12 回数の分布 ---
+;(function () {
+  const svg = document.getElementById('fig-dist')
+  const rows = [['hard', 'Hard', C.hard], ['normal', 'Normal', C.normal], ['easy', 'Easy', C.easy], ['minimax', 'ミニマックス法', C.ref], ['baseline', '基準プレイヤー', C.ref]]
+  const L = 96, R = 390, top = 2, h = 49, max = 500
+  const bw = (R - L) / 11
+  rows.forEach(([key, label, color], r) => {
+    const y0 = top + r * h, base = y0 + h - 8
+    if (r === 3) el(svg, 'line', { x1: 0, x2: R, y1: y0 - 1, y2: y0 - 1, stroke: C.line, 'stroke-dasharray': '3 3' })
+    el(svg, 'text', { x: 0, y: base - 17, class: 'lbl', 'font-weight': 700, fill: r < 3 ? color : C['ink-2'] }, label)
+    el(svg, 'text', { x: 0, y: base - 3, class: 'val' }, `平均 ${MEANS[key].toFixed(2)} 回`)
+    el(svg, 'line', { x1: L, x2: R, y1: base, y2: base, class: 'axis', 'stroke-width': .6 })
+    DIST[key].forEach((cnt, i) => {
+      if (!cnt) return
+      const bh = cnt / max * (h - 12)
+      el(svg, 'rect', { x: L + i * bw + 2, y: base - bh, width: bw - 4, height: bh, rx: 2, fill: color, opacity: r < 3 ? 1 : .6 })
+    })
+  })
+  const by = top + rows.length * h - 8
+  for (let i = 0; i < 11; i++) el(svg, 'text', { x: L + i * bw + bw / 2, y: by + 13, 'text-anchor': 'middle', class: 'val', 'font-size': i < 10 ? 10 : 8.5 }, i < 10 ? i + 1 : '未達')
+  el(svg, 'text', { x: (L + R) / 2, y: by + 28, 'text-anchor': 'middle', class: 'lbl-s' }, '当てるまでの回数(棒の高さ = 1,000 ゲーム中の件数)')
+})()
+
+// ?measure: 各シートの中身の高さ(rem)を body の data 属性に書き出す(レイアウト調整用)
+if (/[?&]measure(&|$)/.test(location.search)) {
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
+  document.body.dataset.measure = [...document.querySelectorAll('.sheet')].map((s) => {
+    const secs = [...s.querySelectorAll('.topics > section')].map((c) => (c.getBoundingClientRect().height / rem).toFixed(1)).join(',')
+    const t = s.querySelector('.topics').getBoundingClientRect().height / rem
+    return `${s.id}: need ${(s.scrollHeight / rem).toFixed(1)} / ${(s.clientHeight / rem).toFixed(1)} topics area ${t.toFixed(1)} sections [${secs}]`
+  }).join(' | ')
+}
+</script>
+</body>
+</html>
