@@ -13,8 +13,11 @@
   --serif: 'Instrument Serif', 'Noto Sans JP', serif;
   --sans: 'DM Sans', 'Noto Sans JP', system-ui, sans-serif;
   --mono: 'DM Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
-  --radius: 14px;
-  --gutter: 16px;
+  --radius: calc(14 * var(--u));
+  --gutter: calc(16 * var(--u));
+
+  /* 寸法の単位。ふだんは 1px で、横幅 1040px 以上では画面に合わせて大きくなる(末尾の @media) */
+  --u: 1px;
 
   color-scheme: light dark;
 }
@@ -49,7 +52,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 16px;
+  font-size: calc(16 * var(--u));
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
@@ -61,7 +64,7 @@ button {
 
 :focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 3px;
+  outline-offset: calc(3 * var(--u));
 }
 
 .visually-hidden {
@@ -78,18 +81,29 @@ button {
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: calc(10 * var(--u));
 }
 
 .logo--large {
-  gap: 16px;
+  gap: calc(16 * var(--u));
+}
+
+/* SVG の width/height 属性より優先して、--u に合わせて拡大する */
+.logo--small svg {
+  width: calc(28 * var(--u));
+  height: calc(28 * var(--u));
+}
+
+.logo--large svg {
+  width: calc(56 * var(--u));
+  height: calc(56 * var(--u));
 }
 
 .wordmark {
   margin: 0;
   font-family: var(--serif);
   font-weight: 400;
-  font-size: 26px;
+  font-size: calc(26 * var(--u));
   line-height: 1;
   letter-spacing: -0.01em;
   white-space: nowrap;
@@ -101,14 +115,14 @@ button {
 }
 
 .logo--large .wordmark {
-  font-size: clamp(48px, 13vw, 72px);
+  font-size: clamp(calc(48 * var(--u)), 13vw, calc(72 * var(--u)));
 }
 
 /* ---------- 共通 ---------- */
 
 .section-title {
-  margin: 0 0 16px;
-  font-size: 14px;
+  margin: 0 0 calc(16 * var(--u));
+  font-size: calc(14 * var(--u));
   font-weight: 500;
   color: var(--muted);
   letter-spacing: 0.04em;
@@ -117,27 +131,27 @@ button {
 .chip {
   display: inline-flex;
   align-items: center;
-  padding: 2px 12px;
+  padding: 2px calc(12 * var(--u));
   border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 13px;
+  border-radius: calc(999 * var(--u));
+  font-size: calc(13 * var(--u));
   font-weight: 500;
   letter-spacing: 0.08em;
   color: var(--muted);
 }
 
 .link-button {
-  min-height: 44px;
-  min-width: 44px;
-  padding: 0 4px;
+  min-height: calc(44 * var(--u));
+  min-width: calc(44 * var(--u));
+  padding: 0 calc(4 * var(--u));
   margin-left: auto;
   background: none;
   border: 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: calc(14 * var(--u));
   cursor: pointer;
   text-decoration: underline;
-  text-underline-offset: 4px;
+  text-underline-offset: calc(4 * var(--u));
   text-decoration-color: var(--line);
 }
 
@@ -148,8 +162,8 @@ button {
 .icon-button {
   display: inline-grid;
   place-items: center;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: calc(44 * var(--u));
+  min-height: calc(44 * var(--u));
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -160,6 +174,11 @@ button {
 
 .icon-button:hover {
   color: var(--ink);
+}
+
+.icon-button svg {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
 }
 
 /* 「やめる」のすぐ左に置く。右寄せの余白はこちらが受け持つ */
@@ -174,14 +193,14 @@ button {
 /* ---------- 遊び方(ゲーム中のダイアログ) ---------- */
 
 .info {
-  width: min(480px, calc(100% - 32px));
-  max-height: calc(100dvh - 32px);
+  width: min(calc(480 * var(--u)), calc(100% - calc(32 * var(--u))));
+  max-height: calc(100dvh - calc(32 * var(--u)));
   padding: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--raised);
   color: var(--ink);
-  box-shadow: 0 24px 64px -24px rgb(20 20 19 / 0.45);
+  box-shadow: 0 calc(24 * var(--u)) calc(64 * var(--u)) -24px rgb(20 20 19 / 0.45);
 }
 
 .info::backdrop {
@@ -190,31 +209,31 @@ button {
 
 .info__body {
   position: relative;
-  padding: 20px 24px 24px;
+  padding: calc(20 * var(--u)) calc(24 * var(--u)) calc(24 * var(--u));
 }
 
 .info__title {
-  margin: 0 0 8px;
-  font-size: 16px;
+  margin: 0 0 calc(8 * var(--u));
+  font-size: calc(16 * var(--u));
   font-weight: 500;
 }
 
 .info__keys {
-  margin-top: 20px;
+  margin-top: calc(20 * var(--u));
 }
 
 .info__close {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 40px;
-  height: 40px;
+  top: calc(8 * var(--u));
+  right: calc(8 * var(--u));
+  width: calc(40 * var(--u));
+  height: calc(40 * var(--u));
   padding: 0;
   border: 0;
   border-radius: 50%;
   background: none;
   color: var(--muted);
-  font-size: 22px;
+  font-size: calc(22 * var(--u));
   line-height: 1;
   cursor: pointer;
 }
@@ -229,9 +248,9 @@ button {
 
 .keys {
   display: grid;
-  gap: 6px;
+  gap: calc(6 * var(--u));
   margin: 0;
-  font-size: 14px;
+  font-size: calc(14 * var(--u));
   color: var(--muted);
 }
 
@@ -239,7 +258,7 @@ button {
   display: grid;
   grid-template-columns: 9.5em 1fr;
   align-items: center;
-  gap: 12px;
+  gap: calc(12 * var(--u));
 }
 
 .keys dt,
@@ -249,14 +268,14 @@ button {
 
 .keycap {
   display: inline-block;
-  padding: 1px 7px;
+  padding: 1px calc(7 * var(--u));
   border: 1px solid var(--line);
   border-bottom-width: 2px;
-  border-radius: 6px;
+  border-radius: calc(6 * var(--u));
   background: var(--bg);
   color: var(--ink);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: calc(12 * var(--u));
   white-space: nowrap;
 }
 
@@ -268,10 +287,10 @@ button {
 }
 
 .button {
-  min-height: 48px;
-  padding: 0 24px;
+  min-height: calc(48 * var(--u));
+  padding: 0 calc(24 * var(--u));
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: calc(999 * var(--u));
   background: var(--raised);
   font-weight: 500;
   cursor: pointer;
@@ -295,12 +314,12 @@ button {
 
 /* キーボードのショートカット表示。タッチ操作の端末では出さない */
 .kbd {
-  margin-left: 8px;
-  padding: 1px 5px;
+  margin-left: calc(8 * var(--u));
+  padding: 1px calc(5 * var(--u));
   border: 1px solid currentColor;
-  border-radius: 4px;
+  border-radius: calc(4 * var(--u));
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: calc(11 * var(--u));
   font-weight: 400;
   opacity: 0.6;
 }
@@ -317,13 +336,13 @@ button {
 .top {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: calc(28 * var(--u));
   box-sizing: border-box;
-  max-width: 960px;
+  max-width: calc(960 * var(--u));
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0 auto;
-  padding: 32px var(--gutter) 24px;
+  padding: calc(32 * var(--u)) var(--gutter) calc(24 * var(--u));
 }
 
 .top__hero {
@@ -331,7 +350,7 @@ button {
 }
 
 .top__lead {
-  margin: 12px 0 0;
+  margin: calc(12 * var(--u)) 0 0;
   color: var(--muted);
   word-break: keep-all;
 }
@@ -343,7 +362,7 @@ button {
 }
 
 .top__select .section-title {
-  margin-bottom: 4px;
+  margin-bottom: calc(4 * var(--u));
   text-align: center;
 }
 
@@ -351,12 +370,12 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: calc(12 * var(--u));
   width: 100%;
 }
 
 .dial {
-  width: 200px;
+  width: calc(200 * var(--u));
   height: auto;
   cursor: grab;
   touch-action: none;
@@ -379,20 +398,20 @@ button {
 .segmented {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  width: min(100%, 340px);
-  padding: 4px;
+  width: min(100%, calc(340 * var(--u)));
+  padding: calc(4 * var(--u));
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: calc(999 * var(--u));
   background: var(--raised);
 }
 
 .segmented__item {
-  min-height: 40px;
+  min-height: calc(40 * var(--u));
   border: 0;
-  border-radius: 999px;
+  border-radius: calc(999 * var(--u));
   background: none;
   color: var(--muted);
-  font-size: 13px;
+  font-size: calc(13 * var(--u));
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -410,10 +429,10 @@ button {
 }
 
 .start-button {
-  width: min(100%, 340px);
-  min-height: 52px;
-  margin-top: 20px;
-  font-size: 16px;
+  width: min(100%, calc(340 * var(--u)));
+  min-height: calc(52 * var(--u));
+  margin-top: calc(20 * var(--u));
+  font-size: calc(16 * var(--u));
   letter-spacing: 0.2em;
 }
 
@@ -427,8 +446,8 @@ button {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto;
     align-content: center;
-    column-gap: 64px;
-    row-gap: 48px;
+    column-gap: calc(64 * var(--u));
+    row-gap: calc(48 * var(--u));
   }
   .top__hero {
     grid-column: 1 / -1;
@@ -438,7 +457,7 @@ button {
     align-self: center;
   }
   .dial {
-    width: 240px;
+    width: calc(240 * var(--u));
   }
 }
 
@@ -463,22 +482,22 @@ button {
 
 @media (max-width: 560px) {
   .top {
-    gap: 20px;
-    padding-top: 24px;
+    gap: calc(20 * var(--u));
+    padding-top: calc(24 * var(--u));
   }
   .logo--large .wordmark {
-    font-size: 48px;
+    font-size: calc(48 * var(--u));
   }
   .top__lead {
-    font-size: 15px;
+    font-size: calc(15 * var(--u));
   }
   .dial {
-    width: 170px;
+    width: calc(170 * var(--u));
   }
 }
 
 .rules {
-  max-width: 560px;
+  max-width: calc(560 * var(--u));
   margin: 0 auto;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
@@ -487,7 +506,7 @@ button {
 .rules summary {
   display: flex;
   align-items: center;
-  min-height: 52px;
+  min-height: calc(52 * var(--u));
   cursor: pointer;
   font-weight: 500;
   list-style: none;
@@ -501,7 +520,7 @@ button {
   content: '+';
   margin-left: auto;
   color: var(--muted);
-  font-size: 20px;
+  font-size: calc(20 * var(--u));
 }
 
 .rules[open] summary::after {
@@ -509,14 +528,14 @@ button {
 }
 
 .rules-list {
-  margin: 0 0 20px;
+  margin: 0 0 calc(20 * var(--u));
   padding-left: 1.2em;
   color: var(--muted);
-  font-size: 15px;
+  font-size: calc(15 * var(--u));
 }
 
 .rules-list li {
-  padding: 4px 0;
+  padding: calc(4 * var(--u)) 0;
 }
 
 .rules-list li::marker {
@@ -526,7 +545,7 @@ button {
 .rules__legend {
   display: inline-block;
   vertical-align: -2px;
-  margin-right: 6px;
+  margin-right: calc(6 * var(--u));
 }
 
 .rules__legend .judgement {
@@ -541,9 +560,9 @@ button {
 
 .game,
 .result {
-  max-width: 1040px;
+  max-width: calc(1040 * var(--u));
   margin: 0 auto;
-  padding: 8px var(--gutter) 24px;
+  padding: calc(8 * var(--u)) var(--gutter) calc(24 * var(--u));
 }
 
 /* 画面の高さいっぱいに広げ、入力パネルの下に余白を残さない */
@@ -558,24 +577,24 @@ button {
 .game__bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 60px;
+  gap: calc(12 * var(--u));
+  min-height: calc(60 * var(--u));
 }
 
 /* スコアは履歴の見出しにあるので、上のバーとの間を少しだけ空ける */
 .game .game__bar {
-  margin-bottom: 12px;
+  margin-bottom: calc(12 * var(--u));
 }
 
 .game__bar .wordmark {
-  font-size: 24px;
+  font-size: calc(24 * var(--u));
 }
 
 .game__body {
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 24px;
+  gap: calc(24 * var(--u));
 }
 
 /* 狭い画面: 履歴が短くても入力パネルは画面の下端に置く */
@@ -586,14 +605,14 @@ button {
 @media (min-width: 880px) {
   .game__body {
     display: grid;
-    grid-template-columns: 1fr 340px;
+    grid-template-columns: 1fr calc(340 * var(--u));
     align-items: stretch;
-    gap: 40px;
+    gap: calc(40 * var(--u));
     /* 内容の高さではなく残りの高さに合わせる(テンキーが縮めるように) */
     flex: 1 1 0px;
     min-height: 0;
   }
-  /* 履歴も縦いっぱいに広げ、10 行で入力パネルの下端まで埋める(1 行は最低 36px) */
+  /* 履歴も縦いっぱいに広げ、10 行で入力パネルの下端まで埋める(1 行は最低 calc(36 * var(--u))) */
   .game .histories {
     min-height: 0;
   }
@@ -611,23 +630,23 @@ button {
   .game .history__row {
     flex: 1 1 0;
     height: auto;
-    min-height: 36px;
+    min-height: calc(36 * var(--u));
   }
   /* 行が高くなる分、数字と判定の丸も大きくする */
   .game .history .code {
-    font-size: clamp(18px, 2.8vh, 30px);
+    font-size: clamp(calc(18 * var(--u)), 2.8vh, calc(30 * var(--u)));
   }
   .game .history .code__slot {
-    width: clamp(11px, 1.6vh, 16px);
-    height: clamp(16px, 2.3vh, 23px);
+    width: clamp(calc(11 * var(--u)), 1.6vh, calc(16 * var(--u)));
+    height: clamp(calc(16 * var(--u)), 2.3vh, calc(23 * var(--u)));
   }
   .game .history .pip {
-    width: clamp(14px, 2vh, 20px);
-    height: clamp(14px, 2vh, 20px);
+    width: clamp(calc(14 * var(--u)), 2vh, calc(20 * var(--u)));
+    height: clamp(calc(14 * var(--u)), 2vh, calc(20 * var(--u)));
   }
   .game .history__no {
-    width: 22px;
-    font-size: 13px;
+    width: calc(22 * var(--u));
+    font-size: calc(13 * var(--u));
   }
   /* 入力パネルは縦いっぱい(履歴と下端を揃える)。中身は「状況・入力欄・テンキー」をひとかたまりにして上下中央に置く */
   .game__body > .dock {
@@ -642,16 +661,16 @@ button {
   }
   /* 入力中の数字は主役なので、高さに余裕があれば大きくする */
   .dock .entry {
-    grid-template-columns: repeat(4, clamp(56px, 7vh, 68px));
+    grid-template-columns: repeat(4, clamp(calc(56 * var(--u)), 7vh, calc(68 * var(--u))));
   }
   .dock .entry__slot {
-    height: clamp(64px, 9vh, 96px);
-    font-size: clamp(44px, 6.5vh, 68px);
+    height: clamp(calc(64 * var(--u)), 9vh, calc(96 * var(--u)));
+    font-size: clamp(calc(44 * var(--u)), 6.5vh, calc(68 * var(--u)));
   }
-  /* キーは 1 段 72px まで。高さが足りなければ 1 段 52px まで縮める */
+  /* キーは 1 段 calc(72 * var(--u)) まで。高さが足りなければ 1 段 calc(52 * var(--u)) まで縮める */
   .keypad {
-    flex: 0 1 312px;
-    min-height: 232px;
+    flex: 0 1 calc(312 * var(--u));
+    min-height: calc(232 * var(--u));
     grid-template-rows: repeat(4, 1fr);
   }
   .key {
@@ -662,21 +681,21 @@ button {
 .histories {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: calc(12 * var(--u));
 }
 
 @media (min-width: 560px) {
   .histories {
-    gap: 24px;
+    gap: calc(24 * var(--u));
   }
 }
 
 .history__title {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  margin: 0 0 8px;
-  font-size: 13px;
+  gap: calc(10 * var(--u));
+  margin: 0 0 calc(8 * var(--u));
+  font-size: calc(13 * var(--u));
   font-weight: 500;
   color: var(--muted);
   letter-spacing: 0.04em;
@@ -711,7 +730,7 @@ button {
 .history__count b {
   margin-right: 2px;
   font-family: var(--serif);
-  font-size: 28px;
+  font-size: calc(28 * var(--u));
   font-weight: 400;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -726,8 +745,8 @@ button {
 .history__row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 36px;
+  gap: calc(8 * var(--u));
+  height: calc(36 * var(--u));
   border-bottom: 1px solid var(--line);
 }
 
@@ -740,9 +759,9 @@ button {
 }
 
 .history__no {
-  width: 18px;
+  width: calc(18 * var(--u));
   flex: none;
-  font-size: 12px;
+  font-size: calc(12 * var(--u));
   color: var(--muted);
   font-variant-numeric: tabular-nums;
   text-align: right;
@@ -755,14 +774,14 @@ button {
 .history__pending {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: calc(8 * var(--u));
+  font-size: calc(13 * var(--u));
   color: var(--muted);
 }
 
 .code {
   font-family: var(--mono);
-  font-size: 18px;
+  font-size: calc(18 * var(--u));
   font-weight: 500;
   letter-spacing: 0.08em;
   min-width: 4.6em;
@@ -770,14 +789,14 @@ button {
 
 .code--hidden {
   display: inline-flex;
-  gap: 4px;
+  gap: calc(4 * var(--u));
   min-width: 4.6em;
 }
 
 .code__slot {
-  width: 11px;
-  height: 16px;
-  border-radius: 3px;
+  width: calc(11 * var(--u));
+  height: calc(16 * var(--u));
+  border-radius: calc(3 * var(--u));
   background: var(--hidden-slot);
 }
 
@@ -790,18 +809,18 @@ button {
 
 .judgement__none {
   color: var(--muted);
-  padding: 0 4px;
+  padding: 0 calc(4 * var(--u));
 }
 
 .pip {
-  width: 14px;
-  height: 14px;
+  width: calc(14 * var(--u));
+  height: calc(14 * var(--u));
 }
 
 .judgement__text {
-  margin-left: 6px;
+  margin-left: calc(6 * var(--u));
   min-width: 3.4em;
-  font-size: 12px;
+  font-size: calc(12 * var(--u));
   color: var(--muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -812,23 +831,23 @@ button {
     display: none;
   }
   .code {
-    font-size: 16px;
+    font-size: calc(16 * var(--u));
     letter-spacing: 0.04em;
   }
   .pip {
-    width: 12px;
-    height: 12px;
+    width: calc(12 * var(--u));
+    height: calc(12 * var(--u));
   }
 }
 
 .thinking {
   display: inline-flex;
-  gap: 3px;
+  gap: calc(3 * var(--u));
 }
 
 .thinking i {
-  width: 5px;
-  height: 5px;
+  width: calc(5 * var(--u));
+  height: calc(5 * var(--u));
   border-radius: 50%;
   background: var(--muted);
   animation: breathe 1.2s infinite ease-in-out;
@@ -867,16 +886,16 @@ button {
 
 .dock {
   position: relative;
-  padding: 20px 16px 16px;
+  padding: calc(20 * var(--u)) calc(16 * var(--u)) calc(16 * var(--u));
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--raised);
 }
 
 .status {
-  margin: 0 0 12px;
-  padding: 0 56px; /* 右上のヒントボタンと重ならないように */
-  font-size: 14px;
+  margin: 0 0 calc(12 * var(--u));
+  padding: 0 calc(56 * var(--u)); /* 右上のヒントボタンと重ならないように */
+  font-size: calc(14 * var(--u));
   color: var(--muted);
   text-align: center;
   min-height: 1.6em;
@@ -889,15 +908,15 @@ button {
 /* ヒント(ミニマックス法)。頼りすぎないよう、右上の控えめなボタンから開く */
 .hint-toggle {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  min-height: 28px;
-  padding: 0 10px;
+  top: calc(8 * var(--u));
+  right: calc(8 * var(--u));
+  min-height: calc(28 * var(--u));
+  padding: 0 calc(10 * var(--u));
   border: 0;
-  border-radius: 999px;
+  border-radius: calc(999 * var(--u));
   background: none;
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12 * var(--u));
   opacity: 0.7;
   cursor: pointer;
 }
@@ -917,38 +936,38 @@ button {
    狭い画面ではパネルの上(履歴の CPU 側)、広い画面ではパネルの左(CPU の履歴)に出す */
 .hint {
   position: absolute;
-  right: 8px;
-  bottom: calc(100% + 8px);
+  right: calc(8 * var(--u));
+  bottom: calc(100% + calc(8 * var(--u)));
   z-index: 5;
-  width: 220px;
-  padding: 12px 36px 12px 14px;
+  width: calc(220 * var(--u));
+  padding: calc(12 * var(--u)) calc(36 * var(--u)) calc(12 * var(--u)) calc(14 * var(--u));
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: calc(12 * var(--u));
   background: var(--raised);
-  box-shadow: 0 12px 32px -16px rgb(20 20 19 / 0.35);
+  box-shadow: 0 calc(12 * var(--u)) calc(32 * var(--u)) -16px rgb(20 20 19 / 0.35);
   text-align: left;
 }
 
 @media (min-width: 880px) {
   .hint {
     top: 0;
-    right: calc(100% + 16px);
+    right: calc(100% + calc(16 * var(--u)));
     bottom: auto;
   }
 }
 
 .hint__close {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 28px;
-  height: 28px;
+  top: calc(6 * var(--u));
+  right: calc(6 * var(--u));
+  width: calc(28 * var(--u));
+  height: calc(28 * var(--u));
   padding: 0;
   border: 0;
   border-radius: 50%;
   background: none;
   color: var(--muted);
-  font-size: 18px;
+  font-size: calc(18 * var(--u));
   line-height: 1;
   cursor: pointer;
 }
@@ -958,7 +977,7 @@ button {
 }
 
 .hint__text {
-  font-size: 13px;
+  font-size: calc(13 * var(--u));
   line-height: 1.6;
 }
 
@@ -968,36 +987,36 @@ button {
 
 .hint__text .code {
   min-width: 0;
-  font-size: 16px;
+  font-size: calc(16 * var(--u));
   color: var(--accent);
 }
 
 .hint__use {
   min-height: 0;
   min-width: 0;
-  margin: 2px 0 6px;
-  font-size: 13px;
+  margin: 2px 0 calc(6 * var(--u));
+  font-size: calc(13 * var(--u));
 }
 
 .hint__note {
-  font-size: 12px;
+  font-size: calc(12 * var(--u));
   color: var(--muted);
 }
 
 .entry {
   display: grid;
-  grid-template-columns: repeat(4, 56px);
+  grid-template-columns: repeat(4, calc(56 * var(--u)));
   justify-content: center;
-  gap: 10px;
+  gap: calc(10 * var(--u));
 }
 
 .entry__slot {
   display: grid;
   place-items: center;
-  height: 64px;
+  height: calc(64 * var(--u));
   border-bottom: 2px solid var(--line);
   font-family: var(--serif);
-  font-size: 44px;
+  font-size: calc(44 * var(--u));
   line-height: 1;
   padding: 0;
   border-width: 0 0 2px;
@@ -1027,10 +1046,10 @@ button {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 8px;
+  gap: calc(8 * var(--u));
   min-height: 3.2em;
-  margin: 8px 0;
-  font-size: 13px;
+  margin: calc(8 * var(--u)) 0;
+  font-size: calc(13 * var(--u));
   line-height: 1.6;
   color: var(--error);
   text-align: left;
@@ -1040,27 +1059,27 @@ button {
   flex: none;
   display: grid;
   place-items: center;
-  width: 18px;
-  height: 18px;
+  width: calc(18 * var(--u));
+  height: calc(18 * var(--u));
   margin-top: 2px;
   border: 1.5px solid currentColor;
   border-radius: 50%;
-  font-size: 11px;
+  font-size: calc(11 * var(--u));
   font-weight: 700;
 }
 
 .keypad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: calc(8 * var(--u));
 }
 
 .key {
-  min-height: 52px;
+  min-height: calc(52 * var(--u));
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: calc(12 * var(--u));
   background: var(--bg);
-  font-size: 22px;
+  font-size: calc(22 * var(--u));
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
@@ -1090,7 +1109,7 @@ button {
 }
 
 .key--action {
-  font-size: 15px;
+  font-size: calc(15 * var(--u));
 }
 
 /* 押しても何も起きない状態。disabled にしないのは、矢印キーでフォーカスを移せるようにするため */
@@ -1100,7 +1119,7 @@ button {
 }
 
 .key--submit {
-  font-size: 15px;
+  font-size: calc(15 * var(--u));
   background: var(--accent);
   border-color: var(--accent);
   color: var(--on-accent);
@@ -1120,7 +1139,7 @@ button {
 /* ---------- 結果 ---------- */
 
 .verdict {
-  padding: 40px 0 32px;
+  padding: calc(40 * var(--u)) 0 calc(32 * var(--u));
   text-align: center;
 }
 
@@ -1128,7 +1147,7 @@ button {
   margin: 0;
   font-family: var(--serif);
   font-weight: 400;
-  font-size: clamp(40px, 11vw, 64px);
+  font-size: clamp(calc(40 * var(--u)), 11vw, calc(64 * var(--u)));
   line-height: 1.2;
   outline: none;
 }
@@ -1138,19 +1157,19 @@ button {
 }
 
 .verdict__message {
-  margin: 8px 0 28px;
+  margin: calc(8 * var(--u)) 0 calc(28 * var(--u));
   color: var(--muted);
 }
 
 .verdict__scores {
   display: flex;
   justify-content: center;
-  gap: 40px;
-  margin: 0 0 32px;
+  gap: calc(40 * var(--u));
+  margin: 0 0 calc(32 * var(--u));
 }
 
 .verdict__scores dt {
-  font-size: 13px;
+  font-size: calc(13 * var(--u));
   color: var(--muted);
 }
 
@@ -1161,7 +1180,7 @@ button {
 
 .verdict__scores .verdict__hints {
   margin-top: 2px;
-  font-size: 12px;
+  font-size: calc(12 * var(--u));
   font-weight: 400;
   color: var(--muted);
 }
@@ -1170,30 +1189,30 @@ button {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 36px;
+  gap: calc(8 * var(--u));
+  margin-bottom: calc(36 * var(--u));
 }
 
 .secret__label {
-  font-size: 13px;
+  font-size: calc(13 * var(--u));
   color: var(--muted);
 }
 
 .secret__code {
   display: flex;
-  gap: 8px;
+  gap: calc(8 * var(--u));
 }
 
 .secret__code span {
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 64px;
+  width: calc(52 * var(--u));
+  height: calc(64 * var(--u));
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: calc(10 * var(--u));
   background: var(--raised);
   font-family: var(--serif);
-  font-size: 40px;
+  font-size: calc(40 * var(--u));
   line-height: 1;
 }
 
@@ -1201,13 +1220,13 @@ button {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
+  gap: calc(12 * var(--u));
 }
 
 .histories--result {
-  max-width: 720px;
+  max-width: calc(720 * var(--u));
   margin: 0 auto;
-  padding-top: 24px;
+  padding-top: calc(24 * var(--u));
   border-top: 1px solid var(--line);
 }
 
@@ -1218,7 +1237,7 @@ button {
 @media (max-width: 559px) {
   .histories--result {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: calc(28 * var(--u));
   }
 }
 
@@ -1228,46 +1247,46 @@ button {
     padding-bottom: 0;
   }
   .game__bar {
-    min-height: 52px;
+    min-height: calc(52 * var(--u));
   }
   .history__row {
-    height: 30px;
+    height: calc(30 * var(--u));
   }
   .game__body {
-    gap: 16px;
+    gap: calc(16 * var(--u));
   }
   .dock {
     position: sticky;
     bottom: 0;
     margin: 0 calc(-1 * var(--gutter));
-    padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom));
+    padding: calc(12 * var(--u)) var(--gutter) calc(calc(12 * var(--u)) + env(safe-area-inset-bottom));
     border-width: 1px 0 0;
     border-radius: 0;
-    box-shadow: 0 -8px 24px -16px rgb(20 20 19 / 0.25);
+    box-shadow: 0 -8px calc(24 * var(--u)) -16px rgb(20 20 19 / 0.25);
   }
   .status {
-    margin-bottom: 4px;
-    font-size: 13px;
+    margin-bottom: calc(4 * var(--u));
+    font-size: calc(13 * var(--u));
   }
   .entry__slot {
-    height: 48px;
-    font-size: 36px;
+    height: calc(48 * var(--u));
+    font-size: calc(36 * var(--u));
   }
   .error {
     min-height: 2.6em;
-    margin: 4px 0 6px;
-    font-size: 12.5px;
+    margin: calc(4 * var(--u)) 0 calc(6 * var(--u));
+    font-size: calc(12.5 * var(--u));
     line-height: 1.3;
   }
   .keypad {
-    gap: 6px;
+    gap: calc(6 * var(--u));
   }
   .key {
-    min-height: 46px;
+    min-height: calc(46 * var(--u));
   }
 }
 
-/* ---------- 横長で高さが 512px 未満 ----------
+/* ---------- 横長で高さが calc(512 * var(--u)) 未満 ----------
    1 画面に収めようとすると部品が潰れるので、収めるのをやめてページのスクロールを許す */
 @media (orientation: landscape) and (max-height: 511px) {
   .top {
@@ -1290,11 +1309,20 @@ button {
   .keypad {
     flex: none;
     min-height: 0;
-    grid-auto-rows: 52px;
+    grid-auto-rows: calc(52 * var(--u));
     grid-template-rows: none;
   }
   /* 狭い画面: 入力パネルを画面下に固定すると画面のほとんどを覆うので、固定しない */
   .dock {
     position: relative; /* ヒントのボタンと吹き出しの基準は残す */
+  }
+}
+
+/* ---------- 横幅 1040px 以上: 全体を拡大 ----------
+   すべての寸法は --u の倍数で書いてある。幅 1040px・高さ 800px を基準に、幅と高さのうち余裕の少ない方に合わせて
+   最大 1.75 倍まで大きくする(高さにも合わせるので、1 画面に収める配置はそのまま収まる) */
+@media (min-width: 1040px) and (min-height: 512px) {
+  :root {
+    --u: clamp(1px, min(100vw / 1040, 100dvh / 800), 1.75px);
   }
 }
