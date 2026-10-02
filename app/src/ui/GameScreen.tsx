@@ -166,7 +166,8 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
   // キーボード入力
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey) return
+      // テンキーなど、子の要素ですでに処理したキーは扱わない
+      if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return
       if (/^[0-9]$/.test(e.key)) {
         e.preventDefault()
         addDigit(e.key)
