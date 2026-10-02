@@ -646,8 +646,41 @@ button {
     flex: 1 1 0px;
     min-height: 0;
   }
-  .histories {
-    align-self: start;
+  /* 履歴も縦いっぱいに広げ、10 行で入力パネルの下端まで埋める(1 行は最低 36px) */
+  .game .histories {
+    min-height: 0;
+  }
+  .game .history {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .game .history__list {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .game .history__row {
+    flex: 1 1 0;
+    height: auto;
+    min-height: 36px;
+  }
+  /* 行が高くなる分、数字と判定の丸も大きくする */
+  .game .history .code {
+    font-size: clamp(18px, 2.8vh, 30px);
+  }
+  .game .history .code__slot {
+    width: clamp(11px, 1.6vh, 16px);
+    height: clamp(16px, 2.3vh, 23px);
+  }
+  .game .history .pip {
+    width: clamp(14px, 2vh, 20px);
+    height: clamp(14px, 2vh, 20px);
+  }
+  .game .history__no {
+    width: 22px;
+    font-size: 13px;
   }
   /* 入力パネルは縦いっぱい。テンキーは下に寄せ、入力欄は残りの高さの中央に置く */
   .game__body > .dock {
