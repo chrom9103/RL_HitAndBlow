@@ -31,6 +31,22 @@ export function ResultScreen({ difficulty, match, hints, onRetry, onChangeDiffic
   const headingRef = useRef<HTMLHeadingElement>(null)
   useEffect(() => headingRef.current?.focus(), [])
 
+  // Enter でもう一度、Esc でトップへ。ボタンにフォーカスがあるときの Enter はそのボタンに任せる
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.repeat || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return
+      if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
+        e.preventDefault()
+        onRetry()
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        onChangeDifficulty()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onRetry, onChangeDifficulty])
+
   const drawMessage =
     outcome.result === 'draw' && !outcome.playerSolved ? 'どちらも 10 回で当てられませんでした。' : MESSAGE[outcome.result]
 
@@ -66,11 +82,13 @@ export function ResultScreen({ difficulty, match, hints, onRetry, onChangeDiffic
           </span>
         </div>
         <div className="actions">
-          <button type="button" className="button button--primary" onClick={onRetry}>
+          <button type="button" className="button button--primary" onClick={onRetry} aria-keyshortcuts="Enter">
             もう一度
+            <kbd className="kbd">Enter</kbd>
           </button>
-          <button type="button" className="button" onClick={onChangeDifficulty}>
+          <button type="button" className="button" onClick={onChangeDifficulty} aria-keyshortcuts="Escape">
             難易度を変える
+            <kbd className="kbd">Esc</kbd>
           </button>
         </div>
       </section>
