@@ -145,6 +145,128 @@ button {
   color: var(--ink);
 }
 
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  color: var(--ink);
+}
+
+/* 「やめる」のすぐ左に置く。右寄せの余白はこちらが受け持つ */
+.game__info {
+  margin-left: auto;
+}
+
+.game__info + .link-button {
+  margin-left: 0;
+}
+
+/* ---------- 遊び方(ゲーム中のダイアログ) ---------- */
+
+.info {
+  width: min(480px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--raised);
+  color: var(--ink);
+  box-shadow: 0 24px 64px -24px rgb(20 20 19 / 0.45);
+}
+
+.info::backdrop {
+  background: rgb(20 20 19 / 0.35);
+}
+
+.info__body {
+  position: relative;
+  padding: 20px 24px 24px;
+}
+
+.info__title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.info__keys {
+  margin-top: 20px;
+}
+
+.info__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.info__close:hover {
+  color: var(--ink);
+}
+
+.info .rules-list {
+  margin-bottom: 0;
+}
+
+.keys {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.keys__row {
+  display: grid;
+  grid-template-columns: 9.5em 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.keys dt,
+.keys dd {
+  margin: 0;
+}
+
+.keycap {
+  display: inline-block;
+  padding: 1px 7px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* タッチ操作の端末ではキーボード操作を出さない */
+@media (hover: none) and (pointer: coarse) {
+  .info__keys {
+    display: none;
+  }
+}
+
 .button {
   min-height: 48px;
   padding: 0 24px;
@@ -386,18 +508,18 @@ button {
   content: '−';
 }
 
-.rules ul {
+.rules-list {
   margin: 0 0 20px;
   padding-left: 1.2em;
   color: var(--muted);
   font-size: 15px;
 }
 
-.rules li {
+.rules-list li {
   padding: 4px 0;
 }
 
-.rules li::marker {
+.rules-list li::marker {
   color: var(--line);
 }
 

@@ -25,6 +25,17 @@ export function Logo({ size = 'small' }: { size?: 'small' | 'large' }) {
   )
 }
 
+/** インフォメーションのマーク(丸で囲んだ i) */
+export function InfoIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="12" cy="7.6" r="1.3" fill="currentColor" />
+      <path d="M12 10.8v6.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 /** 判定の表示。点 = Hit、輪 = Blow。形でも区別でき、読み上げ用の文も付ける。 */
 export function Judgement({ hit, blow }: { hit: number; blow: number }) {
   const label = `${hit} Hit ${blow} Blow`

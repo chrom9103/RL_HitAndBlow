@@ -7,9 +7,10 @@ import { createCpu, type Cpu } from '../cpu/client'
 import { createHinter, type Hinter } from '../hint/client'
 import type { Hint } from '../hint/minimax'
 import { History } from './History'
+import { InfoDialog } from './InfoDialog'
 import { EntrySlots } from './EntrySlots'
 import { Keypad } from './Keypad'
-import { Logo } from './marks'
+import { InfoIcon, Logo } from './marks'
 
 interface Props {
   difficulty: Difficulty
@@ -34,6 +35,7 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
   const [hint, setHint] = useState<{ turn: number; data: Hint | null } | null>(null)
   const [hintTurns, setHintTurns] = useState<ReadonlySet<number>>(() => new Set())
   const [hintOpen, setHintOpen] = useState(false)
+  const [infoOpen, setInfoOpen] = useState(false)
   const dockRef = useRef<HTMLElement>(null)
   /** 最後にフォーカスがあった入力の領域。CPU の手番でボタンが無効になって外れたフォーカスを戻すのに使う */
   const lastZoneRef = useRef<'entry' | 'keypad' | null>(null)
@@ -177,7 +179,8 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       // テンキーなど、子の要素ですでに処理したキーは扱わない
-      if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return
+      // 遊び方を開いている間はゲームの操作をしない(Esc はダイアログを閉じる)
+      if (infoOpen || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return
       const place = e.shiftKey ? /^Digit([1-4])$/.exec(e.code) : null
       if (place) {
         // Shift+1〜4: 千の位〜一の位を選ぶ(e.key は記号になるので e.code で判定する)
@@ -214,7 +217,7 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [addDigit, removeDigit, selectSlot, submit, focusZone, toggleHint, entry.cursor, hintVisible])
+  }, [addDigit, removeDigit, selectSlot, submit, focusZone, toggleHint, entry.cursor, hintVisible, infoOpen])
 
   useEffect(() => {
     const onFocusIn = (e: FocusEvent) => {
@@ -249,10 +252,20 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
       <header className="game__bar">
         <Logo />
         <span className="chip">{DIFFICULTY_LABEL[difficulty]}</span>
+        <button
+          type="button"
+          className="icon-button game__info"
+          onClick={() => setInfoOpen(true)}
+          aria-label="遊び方とキーボード操作"
+          aria-haspopup="dialog"
+        >
+          <InfoIcon />
+        </button>
         <button type="button" className="link-button" onClick={onQuit}>
           やめる
         </button>
       </header>
+      <InfoDialog open={infoOpen} onClose={() => setInfoOpen(false)} />
 
       <div className="scoreboard" aria-label="回数">
         <div className={`score ${playerTurn ? 'is-active' : ''}`}>
