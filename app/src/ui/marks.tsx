@@ -1,5 +1,3 @@
-import type { Difficulty } from '../game/difficulty'
-
 /** シンボル「輪と点」。輪が Blow、点が Hit。 */
 export function Symbol({ size = 40, className }: { size?: number; className?: string }) {
   return (
@@ -24,18 +22,6 @@ export function Logo({ size = 'small' }: { size?: 'small' | 'large' }) {
       <Symbol size={size === 'large' ? 56 : 28} />
       <Wordmark as={size === 'large' ? 'h1' : 'span'} />
     </span>
-  )
-}
-
-/** 難易度のマーク。点が輪の中心に近づくほど難しい。 */
-const DOT_X: Record<Difficulty, number> = { easy: 200, normal: 164, hard: 120 }
-
-export function DifficultyMark({ difficulty, width = 120 }: { difficulty: Difficulty; width?: number }) {
-  return (
-    <svg width={width} height={(width * 140) / 240} viewBox="0 0 240 140" aria-hidden="true" focusable="false">
-      <circle cx="120" cy="70" r="44" fill="none" stroke="var(--ink)" strokeWidth="12" />
-      <circle cx={DOT_X[difficulty]} cy="70" r="18" fill="var(--accent)" />
-    </svg>
   )
 }
 

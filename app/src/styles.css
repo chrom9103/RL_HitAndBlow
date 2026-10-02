@@ -191,90 +191,167 @@ button {
 
 /* ---------- トップ ---------- */
 
+/* 1 画面に収める。広い画面ではロゴの下に「相手を選ぶ」と「遊び方」を左右に並べる */
 .top {
-  max-width: 880px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  box-sizing: border-box;
+  max-width: 960px;
+  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0 auto;
-  padding: 72px var(--gutter) 64px;
+  padding: 32px var(--gutter) 24px;
 }
 
 .top__hero {
   text-align: center;
-  margin-bottom: 64px;
 }
 
 .top__lead {
-  margin: 20px 0 0;
+  margin: 12px 0 0;
   color: var(--muted);
   word-break: keep-all;
 }
 
 .top__select {
-  margin-bottom: 48px;
-}
-
-.top__select .section-title {
-  text-align: center;
-}
-
-.difficulty-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.difficulty-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  min-height: 44px;
-  padding: 32px 12px 24px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--raised);
-  cursor: pointer;
-  transition: border-color 0.15s, transform 0.15s;
 }
 
-.difficulty-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
+.top__select .section-title {
+  margin-bottom: 4px;
+  text-align: center;
 }
 
-.difficulty-card svg {
+.picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   width: 100%;
-  max-width: 132px;
+}
+
+.dial {
+  width: 200px;
   height: auto;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
 }
 
-.difficulty-card__name {
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+.dial.is-dragging {
+  cursor: grabbing;
+}
+
+.dial__dot {
+  /* 少し行き過ぎて戻る動き */
+  transition: transform 0.45s cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+
+.dial.is-dragging .dial__dot {
+  transition: none;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: min(100%, 340px);
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--raised);
+}
+
+.segmented__item {
+  min-height: 40px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
   color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
 }
 
-.difficulty-card:hover .difficulty-card__name {
+.segmented__item:hover {
   color: var(--ink);
+}
+
+.segmented__item[aria-checked='true'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.start-button {
+  width: min(100%, 340px);
+  min-height: 52px;
+  margin-top: 20px;
+  font-size: 16px;
+  letter-spacing: 0.2em;
+}
+
+.start-button .kbd {
+  letter-spacing: 0;
+}
+
+@media (min-width: 880px) {
+  .top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    align-content: center;
+    column-gap: 64px;
+    row-gap: 48px;
+  }
+  .top__hero {
+    grid-column: 1 / -1;
+  }
+  .top__select,
+  .rules {
+    align-self: center;
+  }
+  .dial {
+    width: 240px;
+  }
+}
+
+/* 狭い画面: 遊び方は残りの高さに収め、溢れた分だけその中でスクロールする */
+@media (max-width: 879px) {
+  .top {
+    height: 100vh;
+    height: 100dvh;
+  }
+  .top .rules {
+    flex: 0 1 auto;
+    min-height: 0;
+    width: 100%;
+    overflow-y: auto;
+  }
+  .top .rules summary {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+  }
 }
 
 @media (max-width: 560px) {
   .top {
-    padding-top: 56px;
-  }
-  .difficulty-list {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .difficulty-card {
-    flex-direction: row;
-    justify-content: flex-start;
     gap: 20px;
-    padding: 14px 20px;
+    padding-top: 24px;
   }
-  .difficulty-card svg {
-    width: 96px;
+  .logo--large .wordmark {
+    font-size: 48px;
+  }
+  .top__lead {
+    font-size: 15px;
+  }
+  .dial {
+    width: 170px;
   }
 }
 
@@ -634,8 +711,9 @@ button {
     animation: none;
     opacity: 0.6;
   }
-  .difficulty-card:hover {
-    transform: none;
+  .dial__dot,
+  .segmented__item {
+    transition: none;
   }
 }
 

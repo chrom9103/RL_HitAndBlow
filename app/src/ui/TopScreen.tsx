@@ -1,7 +1,29 @@
-import { DIFFICULTIES, DIFFICULTY_LABEL, type Difficulty } from '../game/difficulty'
-import { DifficultyMark, Judgement, Logo } from './marks'
+import { useEffect, useState } from 'react'
+import { DIFFICULTIES, type Difficulty } from '../game/difficulty'
+import { DifficultyPicker } from './DifficultyPicker'
+import { Judgement, Logo } from './marks'
 
 export function TopScreen({ onStart }: { onStart: (d: Difficulty) => void }) {
+  const [difficulty, setDifficulty] = useState<Difficulty>('normal')
+
+  // ← → で難易度を変え、Enter で始める。ボタンや「遊び方」にフォーカスがあるときはそちらに任せる
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.repeat || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return
+      const onControl = e.target instanceof HTMLButtonElement || (e.target instanceof HTMLElement && e.target.tagName === 'SUMMARY')
+      if (e.key === 'Enter' && !onControl) {
+        e.preventDefault()
+        onStart(difficulty)
+      } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !onControl) {
+        e.preventDefault()
+        const i = DIFFICULTIES.indexOf(difficulty) + (e.key === 'ArrowLeft' ? -1 : 1)
+        setDifficulty(DIFFICULTIES[Math.max(0, Math.min(DIFFICULTIES.length - 1, i))])
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [difficulty, onStart])
+
   return (
     <main className="top">
       <header className="top__hero">
@@ -17,17 +39,14 @@ export function TopScreen({ onStart }: { onStart: (d: Difficulty) => void }) {
         <h2 id="select-title" className="section-title">
           相手を選ぶ
         </h2>
-        <div className="difficulty-list">
-          {DIFFICULTIES.map((d) => (
-            <button key={d} type="button" className="difficulty-card" onClick={() => onStart(d)}>
-              <DifficultyMark difficulty={d} />
-              <span className="difficulty-card__name">{DIFFICULTY_LABEL[d]}</span>
-            </button>
-          ))}
-        </div>
+        <DifficultyPicker value={difficulty} onChange={setDifficulty} />
+        <button type="button" className="button button--primary start-button" onClick={() => onStart(difficulty)} aria-keyshortcuts="Enter">
+          START
+          <kbd className="kbd">Enter</kbd>
+        </button>
       </section>
 
-      <details className="rules">
+      <details className="rules" open>
         <summary>遊び方</summary>
         <ul>
           <li>秘密の数字は、0〜9 のうち重複しない 4 つの数字です。あなたと相手で共通です。</li>
