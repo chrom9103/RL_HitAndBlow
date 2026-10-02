@@ -7,6 +7,8 @@ interface Props {
   onDigit: (d: string) => void
   onDelete: () => void
   onSubmit: () => void
+  /** 一番上の段で ↑ を押して入力欄へ移るとき */
+  onExitUp: () => void
 }
 
 /** 画面上の並び順(3 列)。矢印キーの移動もこの並びに沿う。 */
@@ -29,13 +31,18 @@ function moveIndex(i: number, key: string): number | null {
   }
 }
 
-export function Keypad({ value, disabled, onDigit, onDelete, onSubmit }: Props) {
+export function Keypad({ value, disabled, onDigit, onDelete, onSubmit, onExitUp }: Props) {
   // フォーカスを受け持つキー(roving tabindex)。Tab ではテンキー全体で 1 か所だけ止まる
   const [active, setActive] = useState(0)
   const keysRef = useRef<(HTMLButtonElement | null)[]>([])
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return
+    if (e.key === 'ArrowUp' && active < COLS) {
+      e.preventDefault()
+      onExitUp()
+      return
+    }
     const next = moveIndex(active, e.key)
     if (next === null) return
     // GameScreen 側の矢印キー処理(位の移動)に渡さない
