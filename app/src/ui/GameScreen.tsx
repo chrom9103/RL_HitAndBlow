@@ -196,6 +196,8 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         e.preventDefault()
         selectSlot(Math.min(entry.cursor, CODE_LENGTH) + (e.key === 'ArrowLeft' ? -1 : 1))
+      } else if (e.key === 'h' || e.key === 'H') {
+        if (!e.repeat) toggleHint()
       } else if (e.key === 'Escape') {
         if (hintVisible) {
           setHintOpen(false)
@@ -212,7 +214,7 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [addDigit, removeDigit, selectSlot, submit, focusZone, entry.cursor, hintVisible])
+  }, [addDigit, removeDigit, selectSlot, submit, focusZone, toggleHint, entry.cursor, hintVisible])
 
   useEffect(() => {
     const onFocusIn = (e: FocusEvent) => {
@@ -287,6 +289,8 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
             disabled={!playerTurn}
             aria-expanded={hintVisible}
             aria-controls="hint-panel"
+            aria-keyshortcuts="H"
+            title="ヒント (H)"
           >
             ヒント
           </button>
@@ -295,7 +299,7 @@ export function GameScreen({ difficulty, onFinish, onQuit }: Props) {
               (shownHint.data ? (
                 <HintText hint={shownHint.data} onUse={playerTurn ? fillHint : undefined} />
               ) : (
-                <p className="hint__text">計算中…</p>
+                <div className="hint__text">計算中…</div>
               ))}
             <button type="button" className="hint__close" onClick={() => setHintOpen(false)} aria-label="ヒントを閉じる">
               ×
@@ -336,19 +340,26 @@ function HintText({ hint, onUse }: { hint: Hint; onUse?: () => void }) {
   )
   if (hint.remaining === 1) {
     return (
-      <p className="hint__text">
-        答えは <span className="code">{hint.guess}</span> です {use}
-      </p>
+      <div className="hint__text">
+        <p>
+          答えは <span className="code">{hint.guess}</span> です
+        </p>
+        {use}
+      </div>
     )
   }
   return (
-    <p className="hint__text">
-      残り候補 {hint.remaining.toLocaleString()} 通り。おすすめ <span className="code">{hint.guess}</span> {use}
-      <span className="hint__note">
-        {hint.isCandidate
-          ? `当たる可能性あり。外れても最悪で残り ${hint.worst.toLocaleString()} 通り`
-          : `答えではありませんが、最悪でも残り ${hint.worst.toLocaleString()} 通りに絞れます`}
-      </span>
-    </p>
+    <div className="hint__text">
+      <p>残り候補 {hint.remaining.toLocaleString()} 通り。</p>
+      <p>
+        おすすめ <span className="code">{hint.guess}</span>
+      </p>
+      {use}
+      <p className="hint__note">
+        {hint.isCandidate ? '当たる可能性あり。' : '答えの候補ではありません。'}
+        <br />
+        {hint.isCandidate ? '最悪で' : '最悪でも'}残り {hint.worst.toLocaleString()} 通り
+      </p>
+    </div>
   )
 }

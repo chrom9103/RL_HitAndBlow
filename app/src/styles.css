@@ -689,12 +689,14 @@ button {
   opacity: 0.35;
 }
 
+/* 結果は入力パネルの外に出し、テンキーや入力中の数字に重ねない。
+   狭い画面ではパネルの上(履歴の CPU 側)、広い画面ではパネルの左(CPU の履歴)に出す */
 .hint {
   position: absolute;
-  top: 40px;
   right: 8px;
+  bottom: calc(100% + 8px);
   z-index: 5;
-  width: min(300px, calc(100% - 16px));
+  width: 220px;
   padding: 12px 36px 12px 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -703,8 +705,12 @@ button {
   text-align: left;
 }
 
-.hint[hidden] {
-  display: none;
+@media (min-width: 880px) {
+  .hint {
+    top: 0;
+    right: calc(100% + 16px);
+    bottom: auto;
+  }
 }
 
 .hint__close {
@@ -728,9 +734,12 @@ button {
 }
 
 .hint__text {
-  margin: 0;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.6;
+}
+
+.hint__text p {
+  margin: 0;
 }
 
 .hint__text .code {
@@ -742,12 +751,11 @@ button {
 .hint__use {
   min-height: 0;
   min-width: 0;
-  margin-left: 4px;
+  margin: 2px 0 6px;
   font-size: 13px;
 }
 
 .hint__note {
-  display: block;
   font-size: 12px;
   color: var(--muted);
 }
