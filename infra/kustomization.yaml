@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+
+secretGenerator:
+  - name: hit-and-blow-secret
+    type: kubernetes.io/tls
+    files:
+      - tls.crt=secrets/tls.crt
+      - tls.key=secrets/tls.key

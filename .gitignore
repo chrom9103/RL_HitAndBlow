@@ -16,3 +16,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.tsbuildinfo
+
+# TLS証明書・秘密鍵（リポジトリに入れない）
+infra/secrets/

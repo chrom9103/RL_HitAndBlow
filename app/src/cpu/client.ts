@@ -10,7 +10,7 @@ export interface Cpu {
 let manifestPromise: Promise<Manifest> | null = null
 const weightCache = new Map<Difficulty, Promise<ArrayBuffer>>()
 
-const assetUrl = (path: string) => new URL(path, document.baseURI).href
+const assetUrl = (path: string) => new URL(import.meta.env.BASE_URL + path, document.baseURI).href
 
 function loadManifest(): Promise<Manifest> {
   manifestPromise ??= fetch(assetUrl('weights/manifest.json')).then((r) => {
