@@ -21,4 +21,4 @@ spec:
   tls:
     - hosts:
         - www.chrom.jp
-      secretName: hit-and-blow-secret
+      secretName: chrom-jp-tls  # cert-manager が管理（chrom9103/k8s-certs）
