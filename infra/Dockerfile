@@ -1,6 +1,6 @@
 # ビルドコンテキストはリポジトリルート:
-#   docker build -f infra/Dockerfile -t localhost:32000/hit-and-blow:v0.0.2 .
-#   docker push localhost:32000/hit-and-blow:v0.0.2
+#   docker build -f infra/Dockerfile -t localhost:32000/hit-and-blow:v0.0.3 .
+#   docker push localhost:32000/hit-and-blow:v0.0.3
 #   microk8s kubectl apply -k infra
 FROM node:lts-alpine AS builder
 

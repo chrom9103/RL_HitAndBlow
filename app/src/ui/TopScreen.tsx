@@ -17,6 +17,11 @@ export function TopScreen({ onStart }: { onStart: (d: Difficulty) => void }) {
         onStart(difficulty)
       } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !onControl) {
         e.preventDefault()
+        if (difficulty === 'max') {
+          // 隠しモードの Max は Hard の右隣として扱う(← で Hard に戻る)
+          if (e.key === 'ArrowLeft') setDifficulty('hard')
+          return
+        }
         const i = DIFFICULTIES.indexOf(difficulty) + (e.key === 'ArrowLeft' ? -1 : 1)
         setDifficulty(DIFFICULTIES[Math.max(0, Math.min(DIFFICULTIES.length - 1, i))])
       }

@@ -9,6 +9,7 @@
   "files": {
     "easy": "easy.bin",
     "normal": "normal.bin",
-    "hard": "hard.bin"
+    "hard": "hard.bin",
+    "max": "max.bin"
   }
 }

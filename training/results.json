@@ -36,6 +36,12 @@
       "mean_turns_solved": 5.334,
       "solved_rate": 1.0,
       "max_turns": 7
+    },
+    "max": {
+      "mean_turns": 5.227,
+      "mean_turns_solved": 5.227,
+      "solved_rate": 1.0,
+      "max_turns": 7
     }
   },
   "vs_baseline": {
@@ -58,6 +64,11 @@
       "win": 0.388,
       "draw": 0.321,
       "lose": 0.291
+    },
+    "max": {
+      "win": 0.428,
+      "draw": 0.29600000000000004,
+      "lose": 0.276
     }
   },
   "head_to_head": {
@@ -94,9 +105,37 @@
       "lose": 0.19
     }
   },
+  "vs_max": {
+    "easy": {
+      "win": 0.041,
+      "draw": 0.07999999999999996,
+      "lose": 0.879
+    },
+    "normal": {
+      "win": 0.143,
+      "draw": 0.348,
+      "lose": 0.509
+    },
+    "hard": {
+      "win": 0.171,
+      "draw": 0.6259999999999999,
+      "lose": 0.203
+    },
+    "minimax": {
+      "win": 0.187,
+      "draw": 0.5389999999999999,
+      "lose": 0.274
+    }
+  },
   "minimax_all_secrets": {
     "mean_turns": 5.343253968253968,
     "mean_turns_solved": 5.343253968253968,
+    "solved_rate": 1.0,
+    "max_turns": 7
+  },
+  "max_all_secrets": {
+    "mean_turns": 5.213095238095238,
+    "mean_turns_solved": 5.213095238095238,
     "solved_rate": 1.0,
     "max_turns": 7
   },
@@ -161,6 +200,19 @@
       436,
       409,
       30,
+      0,
+      0,
+      0,
+      0
+    ],
+    "max": [
+      0,
+      1,
+      14,
+      148,
+      453,
+      362,
+      22,
       0,
       0,
       0,

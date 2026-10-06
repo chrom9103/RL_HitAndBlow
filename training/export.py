@@ -42,7 +42,8 @@ def export_weights() -> dict[str, Weights]:
         (out / f"{d}.bin").write_bytes(flat.astype("<f4").tobytes())
         weights[d] = Weights.from_flat(flat, sizes)
         print(f"{d}: {cfg[d]}  {flat.nbytes / 1024:.1f} KB")
-    manifest = {"version": 1, "sizes": sizes, "files": {d: f"{d}.bin" for d in DIFFICULTIES}}
+    # max.bin(難易度 Max の決定木)は solve_optimal.py が書き出す
+    manifest = {"version": 1, "sizes": sizes, "files": {d: f"{d}.bin" for d in [*DIFFICULTIES, "max"]}}
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return weights
 

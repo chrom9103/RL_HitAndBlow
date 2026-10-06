@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: hit-and-blow-container
-          image: localhost:32000/hit-and-blow:v0.0.2
+          image: localhost:32000/hit-and-blow:v0.0.3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

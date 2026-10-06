@@ -3,7 +3,8 @@
     python evaluate.py                      # difficulties.json の 3 難易度を 1,000 ゲームずつ計測 → results.md
     python evaluate.py --scan runs/main     # ラン内の全チェックポイントを計測(難易度の割り当てを決める用)
 
-- 比較のため、プレイヤー向けヒントのミニマックス法(hitblow/minimax.py)も同じ秘密の数字で打たせる。
+- 比較のため、プレイヤー向けヒントのミニマックス法(hitblow/minimax.py)と、難易度 Max の最適戦略
+  (solve_optimal.py が書き出した決定木)も同じ秘密の数字で打たせる。
 
 - 秘密の数字は固定シードで生成し、全員が同じ秘密で打つ。
 - 平均回数は、10 回で当てられなかったゲームを 11 回として数える。
@@ -22,11 +23,14 @@ import numpy as np
 
 from hitblow.codes import N_CODES
 from hitblow.minimax import minimax_turns_all
+from hitblow.optimal import decode_tree, tree_turns
 from hitblow.play import FAIL_TURNS, FeatureMemo, load_weights, play_agent, play_baseline, turns_to_solve
 
 ROOT = Path(__file__).resolve().parent
+MAX_TREE = ROOT.parent / "app" / "public" / "weights" / "max.bin"
 DIFFICULTIES = ["easy", "normal", "hard"]
-LABELS = {"easy": "Easy", "normal": "Normal", "hard": "Hard", "baseline": "基準プレイヤー", "minimax": "ミニマックス法(ヒント)"}
+LABELS = {"easy": "Easy", "normal": "Normal", "hard": "Hard", "baseline": "基準プレイヤー", "minimax": "ミニマックス法(ヒント)",
+          "max": "Max(最適戦略)"}
 
 
 def secrets(n: int, seed: int) -> np.ndarray:
@@ -90,6 +94,9 @@ def full(n: int, seed: int) -> None:
     # ミニマックス法は決定的なので、全 5,040 通りの回数を一度に求めて引く
     minimax_all = minimax_turns_all()
     turns["minimax"] = minimax_all[secs]
+    # Max も決定的(アプリでは対戦ごとに数字を付け替えるが、回数の分布は同じ)
+    max_all = tree_turns(decode_tree(MAX_TREE.read_bytes()))
+    turns["max"] = max_all[secs]
 
     result = {
         "games": n,
@@ -97,13 +104,16 @@ def full(n: int, seed: int) -> None:
         "checkpoints": {d: cfg[d] for d in DIFFICULTIES},
         "summary": {k: summary(v) for k, v in turns.items()},
         "vs_baseline": {d: dict(zip(["win", "draw", "lose"], wdl(turns[d], turns["baseline"])))
-                        for d in [*DIFFICULTIES, "minimax"]},
+                        for d in [*DIFFICULTIES, "minimax", "max"]},
         "head_to_head": {
             f"{a}_vs_{b}": dict(zip(["win", "draw", "lose"], wdl(turns[a], turns[b])))
             for i, a in enumerate(DIFFICULTIES) for b in DIFFICULTIES[i + 1:]
         },
         "vs_minimax": {d: dict(zip(["win", "draw", "lose"], wdl(turns[d], turns["minimax"]))) for d in DIFFICULTIES},
+        "vs_max": {d: dict(zip(["win", "draw", "lose"], wdl(turns[d], turns["max"])))
+                   for d in [*DIFFICULTIES, "minimax"]},
         "minimax_all_secrets": summary(minimax_all),
+        "max_all_secrets": summary(max_all),
         "distribution": {k: np.bincount(v, minlength=FAIL_TURNS + 1)[1:].tolist() for k, v in turns.items()},
     }
     (ROOT / "results.json").write_text(json.dumps(result, indent=2, ensure_ascii=False))
@@ -119,9 +129,9 @@ def to_markdown(r: dict) -> str:
     lines = [f"計測: {r['games']:,} ゲーム(秘密の数字はシード {r['seed']} で生成、全員共通)", ""]
     lines += ["| 難易度 | チェックポイント | 平均回数 | 10回以内に当てた割合 | 基準プレイヤーに 勝ち / 引き分け / 負け |",
               "|---|---|---|---|---|"]
-    for d in DIFFICULTIES:
+    for d in [*DIFFICULTIES, "max"]:
         s, v = r["summary"][d], r["vs_baseline"][d]
-        lines.append(f"| {LABELS[d]} | {r['checkpoints'][d]} | {s['mean_turns']:.2f} | {pct(s['solved_rate'])} | "
+        lines.append(f"| {LABELS[d]} | {r['checkpoints'].get(d, '—')} | {s['mean_turns']:.2f} | {pct(s['solved_rate'])} | "
                      f"{pct(v['win'])} / {pct(v['draw'])} / {pct(v['lose'])} |")
     m, mv = r["summary"]["minimax"], r["vs_baseline"]["minimax"]
     lines.append(f"| ({LABELS['minimax']}) | — | {m['mean_turns']:.2f} | {pct(m['solved_rate'])} | "
@@ -134,13 +144,17 @@ def to_markdown(r: dict) -> str:
         lines.append(f"| {LABELS[a]} 対 {LABELS[b2]} | {pct(v['win'])} / {pct(v['draw'])} / {pct(v['lose'])} |")
     for d, v in r["vs_minimax"].items():
         lines.append(f"| {LABELS[d]} 対 {LABELS['minimax']} | {pct(v['win'])} / {pct(v['draw'])} / {pct(v['lose'])} |")
+    for d, v in r["vs_max"].items():
+        lines.append(f"| {LABELS[d]} 対 {LABELS['max']} | {pct(v['win'])} / {pct(v['draw'])} / {pct(v['lose'])} |")
     lines += ["", "当てるまでの回数の分布(11 = 10 回で当てられず)", "",
               "| | " + " | ".join(str(i) for i in range(1, FAIL_TURNS + 1)) + " |",
               "|---" * (FAIL_TURNS + 1) + "|"]
-    for k in ["easy", "normal", "hard", "minimax", "baseline"]:
+    for k in ["easy", "normal", "hard", "max", "minimax", "baseline"]:
         lines.append(f"| {LABELS[k]} | " + " | ".join(str(c) for c in r["distribution"][k]) + " |")
     a = r["minimax_all_secrets"]
-    lines += ["", f"参考: ミニマックス法を秘密の数字 5,040 通りすべてで打つと平均 {a['mean_turns']:.3f} 回・最悪 {a['max_turns']} 回"]
+    x = r["max_all_secrets"]
+    lines += ["", f"参考: 秘密の数字 5,040 通りすべてで打つと、ミニマックス法は平均 {a['mean_turns']:.3f} 回・最悪 {a['max_turns']} 回、"
+              f"Max は平均 {x['mean_turns']:.4f} 回・最悪 {x['max_turns']} 回"]
     return "\n".join(lines) + "\n"
 
 

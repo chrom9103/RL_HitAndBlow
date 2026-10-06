@@ -395,6 +395,37 @@ button {
   transition: none;
 }
 
+/* 隠しモード: 点がロゴの位置へ吸い込まれる(ドラッグ中でも動かす) */
+.dial.is-max .dial__dot,
+.dial.is-dragging.is-max .dial__dot {
+  transition: transform 0.6s cubic-bezier(0.34, 1.6, 0.5, 1);
+}
+
+/* EASY / NORMAL / HARD の帯と同じ高さに収める(切り替えで下の START が動かないように) */
+.max-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(50 * var(--u));
+  margin: 0;
+  color: var(--accent);
+  font-size: calc(40 * var(--u));
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.3em;
+  /* letter-spacing の分だけ右にずれるので戻す */
+  padding-left: 0.3em;
+  animation: max-in 0.5s cubic-bezier(0.34, 1.6, 0.5, 1);
+}
+
+@keyframes max-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+    letter-spacing: 0;
+  }
+}
+
 .segmented {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -877,8 +908,13 @@ button {
     opacity: 0.6;
   }
   .dial__dot,
+  .dial.is-max .dial__dot,
+  .dial.is-dragging.is-max .dial__dot,
   .segmented__item {
     transition: none;
+  }
+  .max-label {
+    animation: none;
   }
 }
 
