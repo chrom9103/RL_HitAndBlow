@@ -3,9 +3,7 @@
 # Hit and Blow デプロイスクリプト
 # 使用方法: ./deploy.sh
 #
-# 必要ファイル:
-#   - infra/secrets/tls.crt (SSL証明書: サーバー証明書＋中間証明書のフルチェーン)
-#   - infra/secrets/tls.key (SSL秘密鍵)
+# TLS 証明書（Secret: chrom-jp-tls）は cert-manager が自動で発行・更新します（chrom9103/k8s-certs）。
 #
 # イメージ名とタグは infra/deployment.yaml の image から取得します。
 # アプリを更新したときにタグを上げる場合は、deployment.yaml の image を書き換えてください。
@@ -31,33 +29,16 @@ echo "=========================================="
 echo "Deploying Hit and Blow - Image: $IMAGE"
 echo "=========================================="
 
-# 設定ファイルの存在を確認
+# TLS 証明書の Secret を確認（cert-manager が自動で発行・更新する。chrom9103/k8s-certs を参照）
 echo ""
-echo "[1/5] Checking required configuration files..."
-TLS_CRT="$K8S_DIR/secrets/tls.crt"
-TLS_KEY="$K8S_DIR/secrets/tls.key"
-if [ ! -f "$TLS_CRT" ] || [ ! -f "$TLS_KEY" ]; then
-  echo "❌ Error: $TLS_CRT or $TLS_KEY not found"
+echo "[1/5] Checking TLS certificate..."
+TLS_SECRET=$(grep -m1 -E '^[[:space:]]*secretName:' "$K8S_DIR/ingress.yaml" | awk '{print $2}')
+if ! microk8s kubectl get secret "$TLS_SECRET" > /dev/null 2>&1; then
+  echo "❌ Error: TLS Secret $TLS_SECRET not found"
+  echo "  Apply the cert-manager manifests first: kubectl apply -k ~/develops/certs"
   exit 1
 fi
-
-# tls.crt がフルチェーン（サーバー証明書＋中間CA）を含んでいるか確認
-CERT_COUNT=$(grep -c "BEGIN CERTIFICATE" "$TLS_CRT" 2>/dev/null || echo 0)
-if [ "$CERT_COUNT" -lt 2 ]; then
-  echo "❌ Error: $TLS_CRT contains only $CERT_COUNT certificate(s)."
-  echo "  tls.crt must be a full-chain certificate (server cert + intermediate CA certs)."
-  echo "  Example (Let's Encrypt):"
-  echo "    cat your-cert.crt your-certInt.crt > $TLS_CRT"
-  exit 1
-fi
-echo "  ✓ tls.crt contains $CERT_COUNT certificates (full chain)"
-
-# 証明書と秘密鍵がペアになっているか確認
-if [ "$(openssl x509 -in "$TLS_CRT" -noout -pubkey | sha256sum)" != "$(openssl pkey -in "$TLS_KEY" -pubout | sha256sum)" ]; then
-  echo "❌ Error: $TLS_CRT and $TLS_KEY do not match"
-  exit 1
-fi
-echo "  ✓ tls.crt and tls.key match ($(openssl x509 -in "$TLS_CRT" -noout -enddate))"
+echo "  ✓ $TLS_SECRET ($(microk8s kubectl get secret "$TLS_SECRET" -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -noout -enddate))"
 
 # 1. Docker イメージをビルド
 echo ""
@@ -70,8 +51,6 @@ echo "[3/5] Pushing image to local registry..."
 docker push "$IMAGE"
 
 # 3. マニフェストを検証（クラスタを変更する前に kustomize / API のエラーを検出）
-#    TLS Secret は kustomize の secretGenerator が作成し、Ingress の参照先も自動で切り替わるため、
-#    事前に削除する必要はない
 echo ""
 echo "[4/5] Validating Kubernetes manifests (server-side dry-run)..."
 microk8s kubectl apply -k "$K8S_DIR/" --dry-run=server > /dev/null
