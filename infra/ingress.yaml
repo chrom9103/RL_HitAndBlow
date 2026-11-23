@@ -30,4 +30,4 @@ spec:
   tls:
     - hosts:
         - www.chrom.jp
-      secretName: hit-and-blow-secret
+      secretName: chrom-jp-tls
